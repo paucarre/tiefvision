@@ -1,0 +1,36 @@
+require 'nn'
+require 'cunn'
+local model = {}
+require 'inn'
+-- warning: module 'data [type 5]' not found
+table.insert(model, {'conv1', nn.SpatialConvolutionMM(3, 96, 11, 11, 4, 4, 0, 0)})
+table.insert(model, {'relu0', nn.ReLU(true)})
+table.insert(model, {'cccp1', nn.SpatialConvolutionMM(96, 96, 1, 1, 1, 1, 0, 0)})
+table.insert(model, {'relu1', nn.ReLU(true)})
+table.insert(model, {'cccp2', nn.SpatialConvolutionMM(96, 96, 1, 1, 1, 1, 0, 0)})
+table.insert(model, {'relu2', nn.ReLU(true)})
+table.insert(model, {'pool0', nn.SpatialMaxPooling(3, 3, 2, 2, 0, 0):ceil()})
+table.insert(model, {'conv2', nn.SpatialConvolutionMM(96, 256, 5, 5, 1, 1, 2, 2)})
+table.insert(model, {'relu3', nn.ReLU(true)})
+table.insert(model, {'cccp3', nn.SpatialConvolutionMM(256, 256, 1, 1, 1, 1, 0, 0)})
+table.insert(model, {'relu5', nn.ReLU(true)})
+table.insert(model, {'cccp4', nn.SpatialConvolutionMM(256, 256, 1, 1, 1, 1, 0, 0)})
+table.insert(model, {'relu6', nn.ReLU(true)})
+table.insert(model, {'pool2', nn.SpatialMaxPooling(3, 3, 2, 2, 0, 0):ceil()})
+table.insert(model, {'conv3', nn.SpatialConvolutionMM(256, 384, 3, 3, 1, 1, 1, 1)})
+table.insert(model, {'relu7', nn.ReLU(true)})
+table.insert(model, {'cccp5', nn.SpatialConvolutionMM(384, 384, 1, 1, 1, 1, 0, 0)})
+table.insert(model, {'relu8', nn.ReLU(true)})
+table.insert(model, {'cccp6', nn.SpatialConvolutionMM(384, 384, 1, 1, 1, 1, 0, 0)})
+table.insert(model, {'relu9', nn.ReLU(true)})
+table.insert(model, {'pool3', nn.SpatialMaxPooling(3, 3, 2, 2, 0, 0):ceil()})
+table.insert(model, {'drop', nn.Dropout(0.500000)})
+table.insert(model, {'conv4-1024', nn.SpatialConvolutionMM(384, 1024, 3, 3, 1, 1, 1, 1)})
+table.insert(model, {'relu10', nn.ReLU(true)})
+table.insert(model, {'cccp7-1024', nn.SpatialConvolutionMM(1024, 1024, 1, 1, 1, 1, 0, 0)})
+table.insert(model, {'relu11', nn.ReLU(true)})
+table.insert(model, {'cccp8-1024', nn.SpatialConvolutionMM(1024, 1000, 1, 1, 1, 1, 0, 0)})
+table.insert(model, {'relu12', nn.ReLU(true)})
+table.insert(model, {'pool4', inn.SpatialAveragePooling(6, 6, 1, 1)})
+table.insert(model, {'loss', nn.SoftMax()})
+return model

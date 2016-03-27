@@ -1,0 +1,29 @@
+@*
+* Copyright (C) 2016 Pau Carré Cardona - All Rights Reserved
+* You may use, distribute and modify this code under the
+* terms of the GPL v2 license (http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt).
+*@
+@(image: String, boundingBoxOpt: Option[db.BoundingBox] = None)
+<html>
+  <body>
+    <div>
+      <button id="repaint_button">Repaint</button>
+      <button id="save_button">Save and move to next</button>
+    </div>
+    <p>@{image}</p>
+    <canvas id="bbox_canvas" width="1024" height="2048" style="border:1px solid #d3d3d3;">
+    </canvas>
+    </body>
+</html>
+
+<script src="assets/javascripts/jquery-2.2.0.js"></script>
+<script src="assets/javascripts/BoundingBoxEditor.js"></script>
+<script>
+window.onload = function() {
+  @boundingBoxOpt.fold {
+    var boundingBoxEditor = new BoundingBoxEditor("@{image}");
+  } {  boundingBox =>
+    var boundingBoxEditor = new BoundingBoxEditor("@{image}", @{boundingBox.left}, @{boundingBox.right}, @{boundingBox.top}, @{boundingBox.bottom} );
+  }
+}
+</script>

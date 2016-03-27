@@ -1,0 +1,23 @@
+<!--
+Copyright (C) 2016 Pau Carré Cardona - All Rights Reserved
+You may use, distribute and modify this code under the
+terms of the GPL v2 license (http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt).
+-->
+<configuration>
+    
+  <conversionRule conversionWord="coloredLevel" converterClass="play.api.Logger$ColoredLevel" />
+
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>%coloredLevel - %logger - %message%n%xException</pattern>
+    </encoder>
+  </appender>
+
+  <logger name="play" level="INFO" />
+  <logger name="application" level="DEBUG" />
+
+  <root level="ERROR">
+    <appender-ref ref="STDOUT" />
+  </root>
+
+</configuration>
