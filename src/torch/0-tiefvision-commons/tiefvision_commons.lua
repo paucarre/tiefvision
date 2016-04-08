@@ -3,14 +3,12 @@
 -- terms of the GPL v2 license (http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt).
 
 --
--- Commmon utility methods that are used
--- thoughout the other modules. They are mostly
+-- Commmon utility methods that are used thoughout the other modules. They are mostly
 -- related to IO.
 --
 
--- require 'loadcaffe'
 local image = require 'image'
-
+local lfs = require 'lfs'
 local tiefvision_commons = {}
 
 function tiefvision_commons.fileExists(name)
@@ -24,7 +22,7 @@ function tiefvision_commons.getLines(filename)
   if trainFile then
     local index = 1
     for trainFileLine in trainFile:lines() do
-      if(file_exists(trainFileLine)) then
+      if(tiefvision_commons.fileExists(trainFileLine)) then
         lines[index] = trainFileLine
         index = index + 1
       end
@@ -56,7 +54,7 @@ function tiefvision_commons.load_synset()
 end
 
 function tiefvision_commons.img_mean()
-  local img_mean_name = 'ilsvrc_2012_mean.t7'
+  local img_mean_name = '../models/ilsvrc_2012_mean.t7'
   return torch.load(img_mean_name).img_mean:transpose(3,1)
 end
 
@@ -74,7 +72,7 @@ end
 function tiefvision_commons.preprocess(im)
   local img_mean = tiefvision_commons.img_mean()
   local scaledImage = im * 255
-  -- RGB2BGR
+  -- converts RGB to BGR
   local bgrImage = scaledImage:clone()
   bgrImage[{1,{},{}}] = scaledImage[{3,{},{}}]
   bgrImage[{3,{},{}}] = scaledImage[{1,{},{}}]

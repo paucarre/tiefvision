@@ -18,7 +18,7 @@ function loadLocator(index)
 end
 
 function loadClassifier()
-   return torch.load('../models/fashion-classifier-conv.model')
+   return torch.load('../models/classifier.model')
 end
 
 function loadEncoder()

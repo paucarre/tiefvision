@@ -4,6 +4,8 @@ End-to-end deep learning image-similarity search engine.
 
 **TiefVision** is an integrated end-to-end image-based search engine based on deep learning. It covers **image classification**, **image location** ( [OverFeat](http://arxiv.org/pdf/1312.6229v4.pdf) ) and **image similarity** ( [Deep Ranking](http://users.eecs.northwestern.edu/~jwa368/pdfs/deep_ranking.pdf)).
 
+**TiefVision** is implemented in [Torch](http://torch.ch/) and [Play Framework](https://www.playframework.com/) (Scala version). It currently only supports Linux with CUDA-enabled GPU.
+
 # Results
 
 Here are some of the (best) results for a dataset of dresses:
@@ -94,6 +96,33 @@ The current tools are the following:
  * Image (crop) classification
  * Bounding box regression
  * Image Similarity ([Deep Ranking](http://users.eecs.northwestern.edu/~jwa368/pdfs/deep_ranking.pdf))
+
+
+## User Manual
+
+There is still a lot of work to do in order to set it up for a generic project that is
+unrelated to the dataset it is used for (dress style classification).
+Furthermore, there is still a lot of work to do in terms of documentation and also 
+in terms of ease of use.
+Nevertheless, bit a bit the project should be improved to make it simple and easy to use
+for any dataset.
+
+
+### Requisites
+The current mandatory requirements to make TiefVision work are the following:
+
+* Development machine with nVidia CUDA graphics card
+Note that there so far no will to remove this requirement. I might move it to OpenCL
+at the time Torch fully supports it for all neural network layers and it's mature enough
+(e.g. other people also use it and it doesn't crash all the time)
+* Linux OS ( Mac *should* also work)
+* Latest version of Torch 
+* Java Development Kit 8 (copyrighted by Oracle)
+
+
+## Image Classification
+TODO
+
 
 
 ## Copyright

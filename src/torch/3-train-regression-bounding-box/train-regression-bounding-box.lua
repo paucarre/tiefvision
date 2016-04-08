@@ -104,6 +104,9 @@ function loadSavedModel(index)
 end
 
 local index = arg[1]
+if (not(index)) then
+  print("Add a number from 1 to 4 as argument to the command to train one of the four points.")
+end
 print('Training Index ' .. index)
 local mean = torch.load('../models/bbox-train-mean')
 local model = loadSavedModel(index)

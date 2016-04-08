@@ -39,7 +39,7 @@ class Application extends Controller {
       import java.io.File
       val filename = picture.filename
       val contentType = picture.contentType
-      picture.ref.moveTo(new File(s"${Configuration.HomeFolder}/resources/dresses-db/uploaded/master/${filename}"))
+      picture.ref.moveTo(new File(s"${Configuration.HomeFolder}/resources/dresses-db/uploaded/master/${filename}"), true)
       Redirect(routes.Application.similarityFinderUploadResults(filename))
     }.getOrElse {
       Redirect(routes.Application.index).flashing(
