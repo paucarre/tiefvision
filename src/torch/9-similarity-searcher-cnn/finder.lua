@@ -59,7 +59,6 @@ end
 
 function printCmpTable(cmpTable)
   for i = 1, #cmpTable do
-     -- print(cmpTable[i][1] .. ' ' .. cmpTable[i][2])
     print(cmpTable[i][1] .. ' ' .. cmpTable[i][2] .. ' ' .. cmpTable[i][3] )
   end
 end

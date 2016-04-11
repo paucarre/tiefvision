@@ -13,57 +13,57 @@ require 'lfs'
 tiefvision_commons = require 'tiefvision_commons'
 
 function loadData(encoder, filename)
-    local outputsBatch = {}
-    local inputsBatch = {}
-    local lines = getLines(filename)
-    local batchSize = 320
-    local batches =  math.ceil(#lines / batchSize)
-    local linesIndex = 1
-    for i = 1, batches do
-      local currentBatchSize = batchSize
-      if i == batches and #lines % batchSize > 0 then
-        currentBatchSize = #lines % batchSize
-      end
-      local inputs = torch.Tensor(currentBatchSize, 384, 11, 11):cuda()
-      local outputs = torch.Tensor(currentBatchSize, 4):cuda()
-      for li = 1, currentBatchSize do
-        local fileIndex = li + linesIndex - 1
-        local trainFileLine = lines[fileIndex]
-        local encodedInput, target = encodedInputOutput(trainFileLine, encoder)
-        inputs[li] = inputs[li]:set(encodedInput)
-	outputs[li] = outputs[li]:set(target)
-      end
-      linesIndex = linesIndex + currentBatchSize
-      outputsBatch[i] = outputs
-      inputsBatch[i] = inputs
+  local outputsBatch = {}
+  local inputsBatch = {}
+  local lines = getLines(filename)
+  local batchSize = 320
+  local batches =  math.ceil(#lines / batchSize)
+  local linesIndex = 1
+  for i = 1, batches do
+    local currentBatchSize = batchSize
+    if i == batches and #lines % batchSize > 0 then
+      currentBatchSize = #lines % batchSize
     end
-    return inputsBatch, outputsBatch
+    local inputs = torch.Tensor(currentBatchSize, 384, 11, 11):cuda()
+    local outputs = torch.Tensor(currentBatchSize, 4):cuda()
+    for li = 1, currentBatchSize do
+      local fileIndex = li + linesIndex - 1
+      local trainFileLine = lines[fileIndex]
+      local encodedInput, target = encodedInputOutput(trainFileLine, encoder)
+      inputs[li] = inputs[li]:set(encodedInput)
+      outputs[li] = outputs[li]:set(target)
+    end
+    linesIndex = linesIndex + currentBatchSize
+    outputsBatch[i] = outputs
+    inputsBatch[i] = inputs
+  end
+  return inputsBatch, outputsBatch
 end
 
 function getLines(filename)
-    local trainFile = io.open(filename)
-    local lines = {}
-    if trainFile then
-      local index = 1
-      for trainFileLine in trainFile:lines() do
-        lines[index] = trainFileLine
-        index = index + 1
-      end
+  local trainFile = io.open(filename)
+  local lines = {}
+  if trainFile then
+    local index = 1
+    for trainFileLine in trainFile:lines() do
+      lines[index] = trainFileLine
+      index = index + 1
     end
-    return lines
+  end
+  return lines
 end
 
 
 function encodedInputOutput(trainFile, encoder)
-      local name, widht, height, xmin, ymin, xmax, ymax = string.match(trainFile, "(.+)___(%d+)_(%d+)_(-?%d+)_(-?%d+)_(-?%d+)_(-?%d+).jpg")
-      local input = tiefvision_commons.load(trainFile)
-      local encodedInput = encoder:forward(input)[2]
-      local target = torch.CudaTensor(4)
-      target[1] = tonumber(xmin)
-      target[2] = tonumber(ymin)
-      target[3] = tonumber(xmax)
-      target[4] = tonumber(ymax)
-      return encodedInput, target
+  local name, widht, height, xmin, ymin, xmax, ymax = string.match(trainFile, "(.+)___(%d+)_(%d+)_(-?%d+)_(-?%d+)_(-?%d+)_(-?%d+).jpg")
+  local input = tiefvision_commons.load(trainFile)
+  local encodedInput = encoder:forward(input)[2]
+  local target = torch.CudaTensor(4)
+  target[1] = tonumber(xmin)
+  target[2] = tonumber(ymin)
+  target[3] = tonumber(xmax)
+  target[4] = tonumber(ymax)
+  return encodedInput, target
 end
 
 function testStdDevNonZero(size, folder)
@@ -76,15 +76,15 @@ function testStdDevNonZero(size, folder)
 end
 
 function stats(output)
-   local globalMean = torch.zeros(4):cuda()
-   local globalStd  = torch.zeros(4):cuda()
-   for i = 1,#output do
-     local mean = torch.mean(output[i], 1):cuda()
-     local std = torch.std(output[i], 1):cuda()
-     globalMean = torch.add(globalMean, mean[1])
-     globalStd  = torch.add(globalStd, std[1])
-   end
-   return globalMean / #output , globalStd / #output
+  local globalMean = torch.zeros(4):cuda()
+  local globalStd  = torch.zeros(4):cuda()
+  for i = 1,#output do
+    local mean = torch.mean(output[i], 1):cuda()
+    local std = torch.std(output[i], 1):cuda()
+    globalMean = torch.add(globalMean, mean[1])
+    globalStd  = torch.add(globalStd, std[1])
+  end
+  return globalMean / #output , globalStd / #output
 end
 
 function postprocessOutput(output, mean, std)
@@ -100,12 +100,12 @@ function postprocessOutput(output, mean, std)
 end
 
 function getBoundingBoxes(output)
-   local avg = torch.load("../models/bbox-train-mean")
-   local std = torch.load("../models/bbox-train-std")
-   local avgExt = torch.repeatTensor(avg, output:size()[1], 1)
-   local stdExt = torch.repeatTensor(std, output:size()[1], 1)
-   local outputTrans = torch.cmul(output, stdExt) + avgExt
-   return outputTrans
+  local avg = torch.load("../models/bbox-train-mean")
+  local std = torch.load("../models/bbox-train-std")
+  local avgExt = torch.repeatTensor(avg, output:size()[1], 1)
+  local stdExt = torch.repeatTensor(std, output:size()[1], 1)
+  local outputTrans = torch.cmul(output, stdExt) + avgExt
+  return outputTrans
 end
 
 function testinLoadTest(testin)

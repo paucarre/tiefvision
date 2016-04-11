@@ -2,7 +2,7 @@
 -- You may use, distribute and modify this code under the
 -- terms of the GPL v2 license (http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt).
 
-package.path = package.path .. ';../0-tiefvision-commons/?.lua;../6-bboxlib/?.lua;../20-similarity-db/?.lua;../14-similarity-db-cnn/?.lua'
+package.path = package.path .. ';../0-tiefvision-commons/?.lua;../6-bboxlib/?.lua;../11-similarity-db/?.lua;../9-similarity-db-cnn/?.lua'
 require 'inn'
 require 'optim'
 require 'torch'

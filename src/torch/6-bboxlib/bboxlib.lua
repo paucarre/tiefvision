@@ -132,7 +132,6 @@ function getExpectedBoundingBox(boundingBoxes, probs, imageW, imageH, reduction,
   end
 
   return eminx / eminxCount, eminy / eminyCount, emaxx / emaxxCount, emaxy / emaxyCount
-  --return mean[1], mean[2], mean[3], mean[4]
 end
 
 function getImageBoundingBox(x, y, bboxMinx, bboxMiny, bboxMaxx, bboxMaxy, imageW, imageH, reduction, xdelta, ydelta)
@@ -271,7 +270,6 @@ end
 
 
 function getCroppedImage(input, reduction)
-  -- local width, height = input:size()[3], input:size()[2]
   local scale = getInitialScales(input)[2]
   local scaledImage = getScaledImages(input, {scale})[1]
   local width, height = scaledImage:size()[3], scaledImage:size()[2]

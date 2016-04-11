@@ -9,8 +9,8 @@ require 'torch'
 require 'xlua'
 require 'lfs'
 local image = require 'image'
-tiefvision_commons = require 'tiefvision_commons'
-bboxlib = require 'bboxlib'
+local tiefvision_commons = require 'tiefvision_commons'
+local bboxlib = require 'bboxlib'
 
 function getFiles(folder)
   local files = {}

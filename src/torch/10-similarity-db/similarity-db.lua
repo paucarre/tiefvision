@@ -28,7 +28,6 @@ end
 function similarityDb()
   local dataFolder = '../data/db/similarity/img-enc-cnn-encoder'
   local testLines = tiefvision_commons.getFiles(dataFolder)
-  -- local similarities = torch.ones(#testLines, #testLines) * - 1.0
   local similarities = torch.load('../data/db/similarity/img-unsup-similarity-db')
   local initialReferenceIndex = getInitialRefIndex(similarities)
   print('Initial Reference Index: ' .. initialReferenceIndex)
