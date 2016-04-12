@@ -97,33 +97,8 @@ The current tools are the following:
  * Bounding box regression
  * Image Similarity ([Deep Ranking](http://users.eecs.northwestern.edu/~jwa368/pdfs/deep_ranking.pdf))
 
-
-## User Manual
-
-There is still a lot of work to do in order to set it up for a generic project that is
-unrelated to the dataset it is used for (dress style classification).
-Furthermore, there is still a lot of work to do in terms of documentation and also 
-in terms of ease of use.
-Nevertheless, bit a bit the project should be improved to make it simple and easy to use
-for any dataset.
-
-
-### Requisites
-The current mandatory requirements to make TiefVision work are the following:
-
-* Development machine with nVidia CUDA graphics card
-Note that there so far no will to remove this requirement. I might move it to OpenCL
-at the time Torch fully supports it for all neural network layers and it's mature enough
-(e.g. other people also use it and it doesn't crash all the time)
-* Linux OS ( Mac *should* also work)
-* Latest version of Torch 
-* Java Development Kit 8 (copyrighted by Oracle)
-
-
-## Image Classification
-TODO
-
-
+## Developer Guide
+Please refer to the [Developer Guide](doc/developer.md) for details.
 
 ## Copyright
 Copyright (C) 2016 Pau Carré Cardona - All Rights Reserved

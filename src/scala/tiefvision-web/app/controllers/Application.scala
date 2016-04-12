@@ -17,10 +17,6 @@ class Application extends Controller {
 
   def index = editBoundingBox(randomImage)
 
-  def similarityDb() = Action {
-    Ok(views.html.similarityDb(Images))
-  }
-
   def similarityGallery(page: Int = 1, pageGroup: Int = 1) = Action {
     Ok(views.html.similarityGallery(ImagesGrouped(((pageGroup - 1) * 20) + (page - 1)), page, pageGroup, ImagesGrouped.size / 20))
   }

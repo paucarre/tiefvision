@@ -29,6 +29,7 @@ end
 
 local folder = "../../../resources/dresses-db/master"
 local bboxesFolder = "../../../resources/dresses-db/bboxes"
+local flippedBboxesFolder = "../../../resources/dresses-db/bboxes-flipped"
 local files = getFiles(folder)
 for fileIndex = 1, #files do
   if not fileExists(bboxesFolder .. '/1/' .. files[fileIndex]) then
@@ -44,6 +45,10 @@ for fileIndex = 1, #files do
       print(xmin, ymin, xmax, ymax)
       local inputCropped = image.crop(input, xmin, ymin, xmax, ymax)
       image.save(bboxesFolder .. '/' .. i .. '/' .. files[fileIndex], inputCropped)
+      -- generate flipped images 
+      local flippedInput = image.hflip(inputCropped)
+      image.save(flippedBboxesFolder .. '/' .. i .. '/' .. files[fileIndex], flippedInput)
+      collectgarbage()
     end
   end
 end

@@ -30,3 +30,4 @@ src/scala/tiefvision-web/activator
 src/torch/models/
 src/scala/tiefvision-web/target
 src/torch/data/db
+.idea

@@ -12,9 +12,6 @@ GET     /generate_bounding_boxes_crops                   controllers.Application
 GET     /generate_bounding_box_train_and_test_files      controllers.Application.generateBoundingBoxTrainAndTestFiles()
 GET     /generate_classification_train_and_test_files    controllers.Application.generateClassificationTrainAndTestFiles()
 
-# Similarity database
-GET     /similarity_db                       controllers.Application.similarityDb()
-
 # Similarity finder
 GET     /                                            controllers.Application.similarityGallery(page: Int = 1, pageGroup : Int = 1)
 GET     /similarity_gallery/:page/:pageGroup         controllers.Application.similarityGallery(page: Int, pageGroup : Int)

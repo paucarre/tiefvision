@@ -31,7 +31,6 @@ function getTestError(model, criterion, index)
        countRand = countRand + 1
      end
    end
-   print(count)
    errVec = errVec / count
    errRandVec = errRandVec / countRand
    return errVec, errRandVec

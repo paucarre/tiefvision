@@ -42,10 +42,10 @@ object ImageProcessing {
     ImageSearchResult(image, similaritySimilarityMap)
   }
 
-  val findSimilarImagesFromDbFolder =  s"${Configuration.HomeFolder}/src/torch/21-similarity-searcher-cnn-db"
-//  val findSimilarImagesFromDbFolder =  s"${Configuration.HomeFolder}/src/torch/27-deeprank-searcher-db"
+  val findSimilarImagesFromDbFolder =  s"${Configuration.HomeFolder}/src/torch/11-similarity-searcher-cnn-db"
+//  val findSimilarImagesFromDbFolder =  s"${Configuration.HomeFolder}/src/torch/16-deeprank-searcher-db"
 
-  val findSimilarImagesFromFileFolder = s"${Configuration.HomeFolder}/src/torch/22-similarity-searcher-cnn-file"
+  val findSimilarImagesFromFileFolder = s"${Configuration.HomeFolder}/src/torch/12-similarity-searcher-cnn-file"
 
   def similarityLineToSimilarityResult(similarityLine: String) = {
     val pattern = "(.+)\\s(.+)".r
