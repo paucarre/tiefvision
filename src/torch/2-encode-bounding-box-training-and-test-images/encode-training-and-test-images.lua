@@ -15,7 +15,7 @@ tiefvision_commons = require 'tiefvision_commons'
 function loadData(encoder, filename)
   local outputsBatch = {}
   local inputsBatch = {}
-  local lines = getLines(filename)
+  local lines = tiefvision_commons.getLines(filename)
   local batchSize = 320
   local batches = math.ceil(#lines / batchSize)
   local linesIndex = 1
@@ -39,20 +39,6 @@ function loadData(encoder, filename)
   end
   return inputsBatch, outputsBatch
 end
-
-function getLines(filename)
-  local trainFile = io.open(filename)
-  local lines = {}
-  if trainFile then
-    local index = 1
-    for trainFileLine in trainFile:lines() do
-      lines[index] = trainFileLine
-      index = index + 1
-    end
-  end
-  return lines
-end
-
 
 function encodedInputOutput(trainFile, encoder)
   local name, widht, height, xmin, ymin, xmax, ymax = string.match(trainFile, "(.+)___(%d+)_(%d+)_(-?%d+)_(-?%d+)_(-?%d+)_(-?%d+).jpg")

@@ -22,17 +22,12 @@ function getFiles(folder)
   return files
 end
 
-function fileExists(name)
-  local f = io.open(name, "r")
-  if f ~= nil then io.close(f) return true else return false end
-end
-
 local folder = "../../../resources/dresses-db/master"
 local bboxesFolder = "../../../resources/dresses-db/bboxes"
 local flippedBboxesFolder = "../../../resources/dresses-db/bboxes-flipped"
 local files = getFiles(folder)
 for fileIndex = 1, #files do
-  if not fileExists(bboxesFolder .. '/1/' .. files[fileIndex]) then
+  if not tiefvision_commons.fileExists(bboxesFolder .. '/1/' .. files[fileIndex]) then
     print(files[fileIndex])
     local fileName = folder .. '/' .. files[fileIndex]
     local input = bboxlib.loadImageFromFile(fileName)

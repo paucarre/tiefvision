@@ -2,7 +2,7 @@
 -- You may use, distribute and modify this code under the
 -- terms of the GPL v2 license (http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt).
 
-package.path = package.path .. ';./?.lua'
+package.path = package.path .. ';./?.lua;../0-tiefvision-commons/?.lua'
 require 'inn'
 require 'optim'
 require 'torch'
@@ -15,6 +15,7 @@ local batchSize = 32
 
 local inputsBatch = torch.Tensor(batchSize, 384, 11, 11):cuda()
 local outputsBatch = torch.Tensor(batchSize, 1):cuda()
+local tiefvision_commons = require 'tiefvision_commons'
 
 function train(trainIn, trainOut, model, criterion, index, optimState)
   local trainIndex = 1
@@ -95,7 +96,12 @@ function loadCriterion()
 end
 
 function loadSavedModel(index)
-  return torch.load('../models/locatorconv-' .. index .. '.model')
+  local modelPath = '../models/locatorconv-' .. index .. '.model'
+  if(tiefvision_commons.fileExists(modelPath)) then
+    return torch.load(modelPath)
+  else
+    return locatorconv.loadModel()
+  end
 end
 
 function getOptions()

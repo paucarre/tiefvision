@@ -2,11 +2,14 @@
 -- You may use, distribute and modify this code under the
 -- terms of the GPL v2 license (http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt).
 
+package.path = package.path .. ';../0-tiefvision-commons/?.lua;./?.lua'
+
 require 'nn'
 require 'inn'
 require 'image'
 
 local inputSize = 11 * 11 * 384
+local tiefvision_commons = require 'tiefvision_commons'
 
 function getSimilarityModel()
 
@@ -60,19 +63,6 @@ function gradUpdate(similarityModel, x, criterion, learningRate)
   return err
 end
 
-function getLines(filename)
-  local trainFile = io.open(filename)
-  local lines = {}
-  if trainFile then
-    local index = 1
-    for trainFileLine in trainFile:lines() do
-      lines[index] = trainFileLine
-      index = index + 1
-    end
-  end
-  return lines
-end
-
 function getTestSet()
   return getDataSet('similarity-db-test')
 end
@@ -82,18 +72,13 @@ function getTrainingSet()
 end
 
 function getDataSet(file)
-  local lines = getLines('../../../resources/dresses-db/' .. file)
+  local lines = tiefvision_commons.getLines('../../../resources/dresses-db/' .. file)
   local trainingSet = {}
   for i = 1, #lines do
     local reference, similar, different = string.match(lines[i], "(.+),(.+),(.+)")
     trainingSet[i] = { reference, similar, different }
   end
   return trainingSet
-end
-
-function fileExists(name)
-  local f = io.open(name, "r")
-  if f ~= nil then io.close(f) return true else return false end
 end
 
 local criterion = getCriterion()
@@ -231,9 +216,13 @@ function saveModel(model)
 end
 
 function loadModel()
-  return torch.load('../models/similarity.model')
+  local modelPath = '../models/similarity.model'
+  if (tiefvision_commons.fileExists(modelPath)) then
+    return torch.load(modelPath)
+  else
+    return getSimilarityModel()
+  end
 end
-
 
 function getOptions()
   local cmd = torch.CmdLine()

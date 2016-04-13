@@ -26,7 +26,8 @@ class Application extends Controller {
   }
 
   def similarityFinderUploadResults(image: String) = Action {
-    val imageSearchResult = findSimilarImages(image, findSimilarImagesFromFileFolder)
+    val imageSearchResult = findSimilarImages(image, findSimilarImagesFromFileFolder,
+      Some(s"${Configuration.HomeFolder}/${Configuration.UploadedImagesFolder}"))
     Ok(views.html.similarityFinder(imageSearchResult, "uploaded_dresses_db", "uploaded_bboxes_db"))
   }
 

@@ -149,7 +149,12 @@ function loadCriterion()
 end
 
 function loadSavedModelConv()
-  return torch.load('../models/classifier.model')
+  local modelPath = '../models/classifier.model'
+  if(tiefvision_commons.fileExists(modelPath)) then
+    return torch.load(modelPath)
+  else
+    return classifier.loadModel()
+  end
 end
 
 function getOptions()

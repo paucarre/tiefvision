@@ -19,7 +19,7 @@ end
 function tiefvision_commons.getLines(filename)
   local trainFile = io.open(filename)
   local lines = {}
-  if trainFile then
+  if trainFile ~= nil then
     local index = 1
     for trainFileLine in trainFile:lines() do
       if (tiefvision_commons.fileExists(trainFileLine)) then
@@ -27,6 +27,7 @@ function tiefvision_commons.getLines(filename)
         index = index + 1
       end
     end
+    io.close(trainFile)
   end
   return lines
 end
@@ -50,6 +51,7 @@ function tiefvision_commons.load_synset()
     if not line then break end
     table.insert(list, string.sub(line, 11))
   end
+  io.close(file)
   return list
 end
 

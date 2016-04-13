@@ -29,8 +29,8 @@ function getTestError(referenceEncoding)
   search_commons.printCmpTable(comparisonTable)
 end
 
-function getImage(fileName)
-  local input = bboxlib.loadImageFromFile('../../../resources/dresses-db/uploaded/master/' .. fileName)
+function getImage(fileName, imagesFolder)
+  local input = bboxlib.loadImageFromFile(imagesFolder .. '/' .. fileName)
   local bboxes = bboxlib.getImageBoundingBoxesTable(input, 1)
   local xmin = bboxes[1][1]
   local ymin = bboxes[1][2]
@@ -47,15 +47,16 @@ end
 function getOptions()
   local cmd = torch.CmdLine()
   cmd:text()
-  cmd:text('Unsupervised image search from image stored in $TIEFVISION_HOME/resources/dresses-db/uploaded/master/.')
+  cmd:text('Unsupervised image search from an image file.')
   cmd:text('Returns a descending sorted list of filenames concatenated with a similarity metric.')
   cmd:text('The result filenames come from the folder $TIEFVISION_HOME/resources/dresses-db/master.')
   cmd:text()
   cmd:text('Options:')
-  cmd:option('-image', 'Filename (not full path, just the filename) from $TIEFVISION_HOME/resources/dresses-db/uploaded/master.')
+  cmd:option('-image', 'Filename of the query image to search.')
+  cmd:option('-imagesFolder', 'Folder where the images are contained.')
   cmd:text()
   local options = cmd:parse(arg)
-  if(options.image == nil) then
+  if(options.image == nil or options.imagesFolder == nil) then
     cmd:help()
     os.exit()
   end
@@ -63,5 +64,5 @@ function getOptions()
 end
 
 local options = getOptions()
-local referenceDress = getImage(options.image)
+local referenceDress = getImage(options.image, options.imagesFolder)
 getTestError(referenceDress)
