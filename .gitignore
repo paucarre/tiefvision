@@ -17,6 +17,7 @@ out
 ilsvrc_2012_mean.t7
 *.jpeg
 *.database
+*.caffemodel
 resources
 data
 deprecated
