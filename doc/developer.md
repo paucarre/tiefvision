@@ -28,9 +28,22 @@ git clone git@github.com:paucarre/tiefvision.git
 export TIEFVISION_HOME=<PATH_TO_TIEFVISION_REPOSITORY>
 ```
 
-**TODO**: setup of H2 database
+## H2 Database setup
 
-**TODO**: Transfer learning for the encoder
+**TiefVision** uses an **H2** database to store data regarding bounding boxes in images and also similarities between images.
+**TiefVision** expects a **H2** server deployed in the configuration parameter **slick.dbs.bounding_box.db.url** from **$TIEFVISION_HOME/src/scala/tiefvision-web/conf/application.conf**.
+The **H2** database must have the necessary tables created. The DDL SQL query that generates those tables can be found in **$TIEFVISION_HOME/src/scala/tiefvision-web/conf/ddl.sql**.
+
+## Transfer Learning
+
+To encode images TiefVision uses an already trained AlexNet-like neural network. The AlexNet network is split between the convolutional side and the fully connected side.
+The last max pooling layer of the convolutional side is reduce to a step size of one to increase spatial resolution. The images are encoded using the convolutional side.
+
+To split the network you have to follow these steps:
+```
+cd $TIEFVISION_HOME/src/torch/1-split-encoder-classifier
+luajit split-encoder-classifier.lua
+```
 
 ## Bounding Box Regression
 
