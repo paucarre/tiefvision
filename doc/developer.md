@@ -131,22 +131,16 @@ luajit generate-similarity-db.lua
 
 # Unsupervised Similarity Search
 
-At this point it's possible to search images by using the filename from the master image folder **<$TIEFVISION_HOME>/resources/dresses-db/master**:
-```
-cd $TIEFVISION_HOME/src/torch/9-similarity-searcher-cnn
-luajit search.lua <IMAGE_NAME_OF_AN_IMAGE_IN_$TIEFVISION_HOME/resources/dresses-db/master>
-```
-
 To generate a database with all the distances between all the pairs of images in the master folder you should do the following:
 ```
-cd $TIEFVISION_HOME/src/torch/10-similarity-db
+cd $TIEFVISION_HOME/src/torch/9-similarity-db
 luajit similarity-db.lua
 ```
 
 Once the database is generated, the images in master can be searched using that database using:
 ```
-cd $TIEFVISION_HOME/src/torch/11-similarity-searcher-cnn-d
-luajit search.lua <IMAGE_NAME_OF_AN_IMAGE_IN_$TIEFVISION_HOME/resources/dresses-db/master>
+cd $TIEFVISION_HOME/src/torch/10-similarity-searcher-cnn-db
+luajit search.lua -image <IMAGE_NAME_OF_AN_IMAGE_IN_$TIEFVISION_HOME/resources/dresses-db/master>
 ```
 
 # Supervised Image Similarity (Deep Rank)
@@ -180,6 +174,12 @@ luajit deeprank-encoding.lua
 ```
 cd $TIEFVISION_HOME/src/torch/15-deeprank-db
 luajit deeprank-db.lua
+```
+
+Once the database is generated, the images in master can be searched using that database using:
+```
+cd $TIEFVISION_HOME/src/torch/15-deeprank-searcher-db
+luajit search.lua -image <IMAGE_NAME_OF_AN_IMAGE_IN_$TIEFVISION_HOME/resources/dresses-db/master>
 ```
 
 

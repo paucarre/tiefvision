@@ -2,7 +2,7 @@
 -- You may use, distribute and modify this code under the
 -- terms of the GPL v2 license (http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt).
 
-package.path = package.path .. ';../0-tiefvision-commons/?.lua;../6-bboxlib/?.lua;../9-similarity-db/?.lua;../8-similarity-db-cnn/?.lua;../11-similarity-searcher-cnn-db/?.lua'
+package.path = package.path .. ';../0-tiefvision-commons/?.lua;../6-bboxlib/?.lua;../9-similarity-db/?.lua;../8-similarity-db-cnn/?.lua;../10-similarity-searcher-cnn-db/?.lua'
 
 require 'inn'
 require 'optim'
@@ -43,6 +43,25 @@ function getImage(fileName)
   return encodedOutput:double()
 end
 
-local fileName = arg[1]
-local referenceDress = getImage(fileName)
+
+function getOptions()
+  local cmd = torch.CmdLine()
+  cmd:text()
+  cmd:text('Unsupervised image search from image stored in $TIEFVISION_HOME/resources/dresses-db/uploaded/master/.')
+  cmd:text('Returns a descending sorted list of filenames concatenated with a similarity metric.')
+  cmd:text('The result filenames come from the folder $TIEFVISION_HOME/resources/dresses-db/master.')
+  cmd:text()
+  cmd:text('Options:')
+  cmd:option('-image', 'Filename (not full path, just the filename) from $TIEFVISION_HOME/resources/dresses-db/uploaded/master.')
+  cmd:text()
+  local options = cmd:parse(arg)
+  if(options.image == nil) then
+    cmd:help()
+    os.exit()
+  end
+  return options
+end
+
+local options = getOptions()
+local referenceDress = getImage(options.image)
 getTestError(referenceDress)

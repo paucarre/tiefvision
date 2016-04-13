@@ -2,7 +2,7 @@
 -- You may use, distribute and modify this code under the
 -- terms of the GPL v2 license (http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt).
 
-package.path = package.path .. ';../0-tiefvision-commons/?.lua;../11-similarity-searcher-cnn-db/?.lua'
+package.path = package.path .. ';../0-tiefvision-commons/?.lua;../10-similarity-searcher-cnn-db/?.lua'
 require 'inn'
 require 'optim'
 require 'torch'
@@ -27,5 +27,23 @@ function getTestError(reference)
   search_commons.printCmpTable(comparisonTable)
 end
 
-local reference = arg[1]
-getTestError(reference)
+function getOptions()
+  local cmd = torch.CmdLine()
+  cmd:text()
+  cmd:text('Supervised image search from precomputed database of distances between each pair of images in the master folder.')
+  cmd:text('Returns a descending sorted list of filenames concatenated with a similarity metric.')
+  cmd:text('Both the filename to search and the result filenames come from the folder $TIEFVISION_HOME/resources/dresses-db/master.')
+  cmd:text()
+  cmd:text('Options:')
+  cmd:option('-image', "", 'Filename (not full path, just the filename) from $TIEFVISION_HOME/resources/dresses-db/master.')
+  cmd:text()
+  local options = cmd:parse(arg)
+  if(options.image == nil) then
+    cmd:help()
+    os.exit()
+  end
+  return options
+end
+
+local options = getOptions()
+getTestError(options.image)
