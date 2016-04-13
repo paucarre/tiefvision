@@ -2,7 +2,8 @@
 -- You may use, distribute and modify this code under the
 -- terms of the GPL v2 license (http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt).
 
-package.path = package.path .. ';../0-tiefvision-commons/?.lua;../6-bboxlib/?.lua;../11-similarity-db/?.lua;../9-similarity-db-cnn/?.lua'
+package.path = package.path .. ';../0-tiefvision-commons/?.lua;../6-bboxlib/?.lua;../9-similarity-db/?.lua;../8-similarity-db-cnn/?.lua;../11-similarity-searcher-cnn-db/?.lua'
+
 require 'inn'
 require 'optim'
 require 'torch'
@@ -12,6 +13,7 @@ local tiefvision_commons = require 'tiefvision_commons'
 local bboxlib = require 'bboxlib'
 local similarity_lib = require 'similarity_lib'
 local similarity_db_lib = require 'similarity_db_lib'
+local search_commons = require 'search_commons'
 
 function getTestError(referenceEncoding)
   local dataFolder = '../data/db/similarity/img-enc-cnn-encoder'
@@ -23,18 +25,8 @@ function getTestError(referenceEncoding)
     local dist = similarity_lib.similarity(referenceEncoding, imageEncoding)
     table.insert(comparisonTable, { file, dist })
   end
-  table.sort(comparisonTable, sortCmpTable)
-  printCmpTable(comparisonTable)
-end
-
-function sortCmpTable(a, b)
-  return a[2] > b[2]
-end
-
-function printCmpTable(cmpTable)
-  for i = 1, #cmpTable do
-    print(cmpTable[i][1] .. ' ' .. cmpTable[i][2])
-  end
+  table.sort(comparisonTable, search_commons.sortCmpTable)
+  search_commons.printCmpTable(comparisonTable)
 end
 
 function getImage(fileName)
