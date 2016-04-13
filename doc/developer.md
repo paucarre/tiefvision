@@ -80,10 +80,10 @@ luajit encode-training-and-test-images.lua
 The next step is to train the four neural networks needed to detect the bounding box: top, left, bottom and right.
 To do it you'll have to do the following:
 ```
-luajit train-regression-bounding-box.lua 1
-luajit train-regression-bounding-box.lua 2
-luajit train-regression-bounding-box.lua 3
-luajit train-regression-bounding-box.lua 4
+luajit train-regression-bounding-box.lua -index 1
+luajit train-regression-bounding-box.lua -index 2
+luajit train-regression-bounding-box.lua -index 3
+luajit train-regression-bounding-box.lua -index 4
 ```
 
 Finally, you can test the neural networks results by running:

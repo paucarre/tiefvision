@@ -6,7 +6,7 @@ require 'nn'
 require 'inn'
 require 'image'
 
-local inputSize =  11 * 11 * 384
+local inputSize = 11 * 11 * 384
 
 function getSimilarityModel()
 
@@ -22,7 +22,7 @@ function getSimilarityModel()
   --leftImage:add(nn.SpatialConvolutionMM(512, 126, 1, 1, 1, 1, 0, 0):cuda())
   --leftImage:add(nn.ReLU(true):cuda())
   --leftImage:add(nn.Dropout(0.5):cuda())
-  leftImage:add(nn.Reshape(384*11*11):cuda())
+  leftImage:add(nn.Reshape(384 * 11 * 11):cuda())
 
   local rightImage = leftImage:clone('weight', 'bias')
 
@@ -43,7 +43,6 @@ function getSimilarityModel()
   similarityModel:add(distanceParallel)
 
   return similarityModel:cuda()
-
 end
 
 function getCriterion()
@@ -79,7 +78,7 @@ function getTestSet()
 end
 
 function getTrainingSet()
-   return getDataSet('similarity-db-train')
+  return getDataSet('similarity-db-train')
 end
 
 function getDataSet(file)
@@ -87,14 +86,14 @@ function getDataSet(file)
   local trainingSet = {}
   for i = 1, #lines do
     local reference, similar, different = string.match(lines[i], "(.+),(.+),(.+)")
-    trainingSet[i] = {reference, similar, different}
+    trainingSet[i] = { reference, similar, different }
   end
   return trainingSet
 end
 
 function fileExists(name)
-  local f=io.open(name,"r")
-  if f~=nil then io.close(f) return true else return false end
+  local f = io.open(name, "r")
+  if f ~= nil then io.close(f) return true else return false end
 end
 
 local criterion = getCriterion()
@@ -130,19 +129,19 @@ function getReferenceSimilarDifferentRaw(datasource)
   local flippedEncodedFolder = '../data/db/similarity/img-enc-cnn-encoder-flipped'
   local reference = torch.load(encodedFolder .. '/' .. datasource[1]):cuda()
   local similar
-  if(datasource[1] == datasource[2]) then
+  if (datasource[1] == datasource[2]) then
     similar = torch.load(flippedEncodedFolder .. '/' .. datasource[2]):cuda()
   else
     similar = torch.load(encodedFolder .. '/' .. datasource[2])
   end
-  local different= torch.load(encodedFolder .. '/' .. datasource[3])
+  local different = torch.load(encodedFolder .. '/' .. datasource[3])
   return reference:transpose(1, 3):cuda(), similar:transpose(1, 3):cuda(), different:transpose(1, 3):cuda()
 end
 
 function getReferenceSimilarDifferent(datasource)
   local reference, similar, different = getReferenceSimilarDifferentRaw(datasource)
 
-  local minHeight = math.min( math.min(reference:size()[2], similar:size()[2]), different:size()[2] ) - 11 + 1
+  local minHeight = math.min(math.min(reference:size()[2], similar:size()[2]), different:size()[2]) - 11 + 1
   local heightStart = math.random(minHeight)
   local referenceW = getHeightWindow(reference, heightStart)
   local similarW = getHeightWindow(similar, heightStart)
@@ -162,7 +161,7 @@ function train(similarityModel)
     similarityModel:training()
     local trainError = trainBatchGradUpdate(similarityModel, batchSize, trainIndex, trainingSet, batchSet)
     print('TRAIN_ERROR:' .. trainError)
-    if(((trainIndex - 1)/batchSize) % 10 == 0) then
+    if (((trainIndex - 1) / batchSize) % 10 == 0) then
       print("Saving model...")
       saveModel(similarityModel)
       print("Model saved")
@@ -173,8 +172,8 @@ function train(similarityModel)
 end
 
 function testModel(similarityModel)
-  local testOk, testNum= test(similarityModel)
-  print('Test Rate:' .. testOk /  testNum , testOk .. ' out of ' .. testNum)
+  local testOk, testNum = test(similarityModel)
+  print('Test Rate:' .. testOk / testNum, testOk .. ' out of ' .. testNum)
 end
 
 function test(similarityModel)
@@ -196,7 +195,7 @@ function test(similarityModel)
     local currentCorrectRank = 0.0
     --if(testSet[testIndex][1] ~= testSet[testIndex][2]) then
     local reference, similar, different = getReferenceSimilarDifferentRaw(testSet[testIndex])
-    local minHeight = math.min( math.min(reference:size()[2], similar:size()[2]), different:size()[2] ) - 11
+    local minHeight = math.min(math.min(reference:size()[2], similar:size()[2]), different:size()[2]) - 11
     for h = 1, 3 do
       local referenceW = getHeightWindow(reference, h)
       local similarW = getHeightWindow(similar, h)
@@ -211,14 +210,14 @@ function test(similarityModel)
       similarOutput = similarOutput + currSimilarOutput
       local currDifferentOutput = imagesDist:forward(batchSetDifferent)[1]
       differentOutput = differentOutput + currDifferentOutput
-      if(currSimilarOutput > currDifferentOutput) then
+      if (currSimilarOutput > currDifferentOutput) then
         currentCorrectRank = currentCorrectRank + 1
       else
         currentCorrectRank = currentCorrectRank - 1
       end
     end
     --if(currentCorrectRank > 0) then
-    if(similarOutput > differentOutput) then
+    if (similarOutput > differentOutput) then
       correctRank = correctRank + 1
     end
     successfulTestAttempts = successfulTestAttempts + 1
@@ -228,11 +227,11 @@ function test(similarityModel)
 end
 
 function saveModel(model)
-   torch.save('../models/similarity.model', model)
+  torch.save('../models/similarity.model', model)
 end
 
 function loadModel()
-   return torch.load('../models/similarity.model')
+  return torch.load('../models/similarity.model')
 end
 
 local similarityModel = loadModel()

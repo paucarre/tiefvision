@@ -12,4 +12,5 @@ function detectGrayscale(imagePath)
     print("G")
   end
 end
+
 detectGrayscale(arg[1])

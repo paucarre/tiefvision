@@ -11,24 +11,24 @@ require 'lfs'
 local tiefvision_commons = require 'tiefvision_commons'
 
 function getTestError(reference)
-   local dataFolder = '../data/db/similarity/img-enc-cnn-encoder'
-   local similarityDb = '../data/db/similarity/img-unsup-similarity-db'
-   local testLines = tiefvision_commons.getFiles(dataFolder)
-   local similarities = torch.load(similarityDb):double()
-   local referenceIndex = getIndex(testLines, reference)
-   local comparisonTable = {}
-   for testIndex = 1, #testLines do
-     local file = testLines[testIndex]
-     local sim = similarities[referenceIndex][testIndex]
-     table.insert(comparisonTable, {file, sim})
-   end
-   table.sort(comparisonTable, sortCmpTable)
-   printCmpTable(comparisonTable)
+  local dataFolder = '../data/db/similarity/img-enc-cnn-encoder'
+  local similarityDb = '../data/db/similarity/img-unsup-similarity-db'
+  local testLines = tiefvision_commons.getFiles(dataFolder)
+  local similarities = torch.load(similarityDb):double()
+  local referenceIndex = getIndex(testLines, reference)
+  local comparisonTable = {}
+  for testIndex = 1, #testLines do
+    local file = testLines[testIndex]
+    local sim = similarities[referenceIndex][testIndex]
+    table.insert(comparisonTable, { file, sim })
+  end
+  table.sort(comparisonTable, sortCmpTable)
+  printCmpTable(comparisonTable)
 end
 
 function getIndex(testLines, reference)
   for testIndex = 1, #testLines do
-    if(testLines[testIndex] == reference) then
+    if (testLines[testIndex] == reference) then
       return testIndex
     end
   end

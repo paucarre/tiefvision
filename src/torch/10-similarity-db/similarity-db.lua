@@ -18,7 +18,7 @@ function getInitialRefIndex(similarities)
     for testIndex = refIndex, similarities:size()[2] do
       allMinusOne = allMinusOne and similarities[refIndex][testIndex] == -1.0
     end
-    if(allMinusOne) then
+    if (allMinusOne) then
       return refIndex
     end
   end
@@ -34,21 +34,21 @@ function similarityDb()
   for referenceIndex = initialReferenceIndex, #testLines do
     local reference = testLines[referenceIndex]
     print(reference)
-    local referenceEncoding = torch.load(dataFolder .. '/' ..  reference):double()
+    local referenceEncoding = torch.load(dataFolder .. '/' .. reference):double()
     for testIndex = referenceIndex + 1, #testLines do
       local file = testLines[testIndex]
       local imageEncoding = torch.load(dataFolder .. '/' .. file):double()
       local similarity = similarity_lib.similarity(referenceEncoding, imageEncoding)
-      if(similarity) then
+      if (similarity) then
         similarities[testIndex][referenceIndex] = similarity
         similarities[referenceIndex][testIndex] = similarity
- 	-- print('DIST( ' .. reference .. ', ' .. file .. ' ) = ' .. similarity)
+        -- print('DIST( ' .. reference .. ', ' .. file .. ' ) = ' .. similarity)
       end
     end
     -- compare itself with its mirror
     local flippedEncoding = torch.load('../data/db/similarity/img-enc-cnn-encoder-flipped/' .. reference):double()
     local similarity = similarity_lib.similarity(referenceEncoding, flippedEncoding)
-    if(similarity) then
+    if (similarity) then
       similarities[referenceIndex][referenceIndex] = similarity
       -- print('DIST( ' .. reference .. ', ' .. reference .. ' ) = ' .. similarity)
     end

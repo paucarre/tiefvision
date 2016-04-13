@@ -8,18 +8,18 @@ local similarity_lib = {}
 
 function similarity_lib.similarity(referenceEncoding, imageEncoding)
   local sumSimilarity = 0.0
-  if(referenceEncoding:size():size() == 3 and imageEncoding:size():size() == 3) then
+  if (referenceEncoding:size():size() == 3 and imageEncoding:size():size() == 3) then
     --print(referenceEncoding:size())
     --print(imageEncoding:size())
     referenceEncoding = referenceEncoding:transpose(1, 3)
     imageEncoding = imageEncoding:transpose(1, 3)
     local minHeight = math.min(referenceEncoding:size()[2], imageEncoding:size()[2])
     local maxHeight = math.max(referenceEncoding:size()[2], imageEncoding:size()[2])
-    if( maxHeight - minHeight < 5) then
+    if (maxHeight - minHeight < 5) then
       for h = 1, minHeight do
         for w = 1, referenceEncoding:size()[1] do
           local similarityLoc = imageEncoding[w][h] * referenceEncoding[w][h]
-          sumSimilarity =  sumSimilarity + similarityLoc
+          sumSimilarity = sumSimilarity + similarityLoc
         end
       end
       local similarity = sumSimilarity / (minHeight * referenceEncoding:size()[1])

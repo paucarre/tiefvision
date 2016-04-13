@@ -15,7 +15,7 @@ local bboxlib = require 'bboxlib'
 function getFiles(folder)
   local files = {}
   for file in lfs.dir(folder) do
-    if (lfs.attributes(folder .. '/' .. file,"mode") == "file") then
+    if (lfs.attributes(folder .. '/' .. file, "mode") == "file") then
       table.insert(files, file)
     end
   end
@@ -23,8 +23,8 @@ function getFiles(folder)
 end
 
 function fileExists(name)
-   local f=io.open(name,"r")
-   if f~=nil then io.close(f) return true else return false end
+  local f = io.open(name, "r")
+  if f ~= nil then io.close(f) return true else return false end
 end
 
 local folder = "../../../resources/dresses-db/master"

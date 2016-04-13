@@ -14,52 +14,52 @@ tiefvision_commons = require 'tiefvision_commons'
 local bboxlib = {}
 
 function loadLocator(index)
-   return torch.load('../models/locatorconv-' .. index .. '.model')
+  return torch.load('../models/locatorconv-' .. index .. '.model')
 end
 
 function loadClassifier()
-   return torch.load('../models/classifier.model')
+  return torch.load('../models/classifier.model')
 end
 
 function loadEncoder()
-   return torch.load('../models/encoder.model')
+  return torch.load('../models/encoder.model')
 end
 
 function getBoundingBoxes(model, encodedInputs, index)
-   local avg = torch.load("../models/bbox-train-mean")[index]
-   local avgTensor = torch.Tensor(1):cuda()
-   avgTensor[1] = avg
-   local std = torch.load("../models/bbox-train-std")[index]
-   local stdTensor = torch.Tensor(1):cuda()
-   stdTensor[1] = std
-   local output = model:forward(encodedInputs)
-   output = output:transpose(1, 3)
-   output = output:transpose(1, 2)
-   local avgExt = torch.repeatTensor(avgTensor, output:size()[1], output:size()[2], 1)
-   local stdExt = torch.repeatTensor(stdTensor, output:size()[1], output:size()[2], 1)
-   local outputTrans = torch.cmul(output, stdExt) + avgExt
-   return outputTrans
+  local avg = torch.load("../models/bbox-train-mean")[index]
+  local avgTensor = torch.Tensor(1):cuda()
+  avgTensor[1] = avg
+  local std = torch.load("../models/bbox-train-std")[index]
+  local stdTensor = torch.Tensor(1):cuda()
+  stdTensor[1] = std
+  local output = model:forward(encodedInputs)
+  output = output:transpose(1, 3)
+  output = output:transpose(1, 2)
+  local avgExt = torch.repeatTensor(avgTensor, output:size()[1], output:size()[2], 1)
+  local stdExt = torch.repeatTensor(stdTensor, output:size()[1], output:size()[2], 1)
+  local outputTrans = torch.cmul(output, stdExt) + avgExt
+  return outputTrans
 end
 
 function toOutputCoordinates(x, y, reduction, xdelta, ydelta)
---  local xo = math.floor((x - (xdelta / 2.0)) / reduction)
---  local yo = math.floor((y - (ydelta / 2.0)) / reduction)
---  if xo <= 0 then xo = 1 end
---  if yo <= 0 then yo = 1 end
---  return xo, yo
+  --  local xo = math.floor((x - (xdelta / 2.0)) / reduction)
+  --  local yo = math.floor((y - (ydelta / 2.0)) / reduction)
+  --  if xo <= 0 then xo = 1 end
+  --  if yo <= 0 then yo = 1 end
+  --  return xo, yo
   return toOutputCoordinate(x), toOutputCoordinate(y)
 end
 
 function toOutputCoordinate(coord)
-  return math.max(math.floor((math.floor((math.floor((coord-10)/4)-2)/2)-2)/2)-2+1-10, 1)
+  return math.max(math.floor((math.floor((math.floor((coord - 10) / 4) - 2) / 2) - 2) / 2) - 2 + 1 - 10, 1)
 end
 
-function toImageCoordinates(x, y, reduction, xdelta, ydelta)
+function toImageCoordinates(x, y)
   return toImageCoordinate(x), toImageCoordinate(y)
 end
 
 function toImageCoordinate(coord)
-  return ( ( ( ( ( ( coord - 1 + 2 + 10) * 2) + 2) * 2) + 2) * 4) + 10 + 7 - 224
+  return ((((((coord - 1 + 2 + 10) * 2) + 2) * 2) + 2) * 4) + 10 + 7 - 224
 end
 
 --  Equations:
@@ -67,24 +67,24 @@ end
 --    Ox = (Ix - delta) / reduction
 --    Ix = (Ox * reduction) + delta
 function getDeltas(imageW, imageH, outputW, outputH, reduction)
-  local xdelta = imageW - ( outputW * reduction )
-  local ydelta = imageH - ( outputH * reduction )
+  local xdelta = imageW - (outputW * reduction)
+  local ydelta = imageH - (outputH * reduction)
   return xdelta, ydelta
 end
 
 function meanBoundingBox(boundingBoxes)
-  local sum = {0.0, 0.0, 0.0, 0.0}
+  local sum = { 0.0, 0.0, 0.0, 0.0 }
   for i = 1, #boundingBoxes do
     local boundingBox = boundingBoxes[i]
-    sum = {sum[1] + boundingBox[1], sum[2] + boundingBox[2], sum[3] + boundingBox[3], sum[4] + boundingBox[4]}
+    sum = { sum[1] + boundingBox[1], sum[2] + boundingBox[2], sum[3] + boundingBox[3], sum[4] + boundingBox[4] }
   end
-  local mean = {sum[1] / #boundingBoxes, sum[2] / #boundingBoxes, sum[3] / #boundingBoxes, sum[4] / #boundingBoxes}
+  local mean = { sum[1] / #boundingBoxes, sum[2] / #boundingBoxes, sum[3] / #boundingBoxes, sum[4] / #boundingBoxes }
   return mean
 end
 
 function boundingBoxOutputCenter(boundingBox, reduction, xdelta, ydelta)
-  local xcenter = boundingBox[1] + ( ( boundingBox[3] - boundingBox[1] ) / 2.0)
-  local ycenter = boundingBox[2] + ( ( boundingBox[4] - boundingBox[2] ) / 2.0)
+  local xcenter = boundingBox[1] + ((boundingBox[3] - boundingBox[1]) / 2.0)
+  local ycenter = boundingBox[2] + ((boundingBox[4] - boundingBox[2]) / 2.0)
   return toOutputCoordinates(xcenter, ycenter, reduction, xdelta, ydelta)
 end
 
@@ -135,7 +135,7 @@ function getExpectedBoundingBox(boundingBoxes, probs, imageW, imageH, reduction,
 end
 
 function getImageBoundingBox(x, y, bboxMinx, bboxMiny, bboxMaxx, bboxMaxy, imageW, imageH, reduction, xdelta, ydelta)
-  local xbi, ybi = toImageCoordinates(x, y, reduction, xdelta, ydelta)
+  local xbi, ybi = toImageCoordinates(x, y)
   local minx = xbi + bboxMinx[y][x][1]
   local miny = ybi + bboxMiny[y][x][1]
   local maxx = xbi + bboxMaxx[y][x][1]
@@ -146,14 +146,14 @@ function getImageBoundingBox(x, y, bboxMinx, bboxMiny, bboxMaxx, bboxMaxy, image
 end
 
 function cleanBoundingBox(x, y, imageW, imageH)
-  if(x < 1) then
-     x = 1
-  elseif(x > imageW) then
-     x = imageW
+  if (x < 1) then
+    x = 1
+  elseif (x > imageW) then
+    x = imageW
   end
-  if(y < 1) then
+  if (y < 1) then
     y = 1
-  elseif(y > imageH) then
+  elseif (y > imageH) then
     y = imageH
   end
   return math.floor(x), math.floor(y)
@@ -168,9 +168,9 @@ end
 
 function getEncodedLowInput(input)
   local encoder = loadEncoder()
-  local encodedInput = encoder:forward(input)
+  encoder:forward(input)
   local lowModule = encoder.modules[7]
-  local lowInput  = lowModule.output
+  local lowInput = lowModule.output
   return lowInput
 end
 
@@ -195,7 +195,7 @@ function getFiles()
   local files = {}
   local folder = "../data/db/high"
   for file in lfs.dir(folder) do
-    if (lfs.attributes(folder .. '/' .. file,"mode") == "file") then
+    if (lfs.attributes(folder .. '/' .. file, "mode") == "file") then
       table.insert(files, file)
     end
   end
@@ -206,7 +206,7 @@ function getTestImageFiles()
   local files = {}
   local folder = '../../../resources/dresses-db/master'
   for file in lfs.dir(folder) do
-    if (lfs.attributes(folder .. '/' .. file,"mode") == "file") then
+    if (lfs.attributes(folder .. '/' .. file, "mode") == "file") then
       table.insert(files, folder .. '/' .. file)
     end
   end
@@ -258,9 +258,9 @@ function getBboxes(input, reduction)
   local i = 1
   for x = 1, bboxMinx:size()[2] do
     for y = 1, bboxMinx:size()[1] do
-      if(probabilities[y][x] > 0.85) then
-        local xmin, ymin, xmax, ymax = getImageBoundingBox(x, y, bboxMinx, bboxMiny, bboxMaxx, bboxMaxy , width, height, reduction)
-        bboxes[i] = {xmin, ymin, xmax, ymax, probabilities[y][x], x, y}
+      if (probabilities[y][x] > 0.85) then
+        local xmin, ymin, xmax, ymax = getImageBoundingBox(x, y, bboxMinx, bboxMiny, bboxMaxx, bboxMaxy, width, height, reduction)
+        bboxes[i] = { xmin, ymin, xmax, ymax, probabilities[y][x], x, y }
         i = i + 1
       end
     end
@@ -271,11 +271,11 @@ end
 
 function getCroppedImage(input, reduction)
   local scale = getInitialScales(input)[2]
-  local scaledImage = getScaledImages(input, {scale})[1]
+  local scaledImage = getScaledImages(input, { scale })[1]
   local width, height = scaledImage:size()[3], scaledImage:size()[2]
   local bboxes, probabilities, probDensity = getBboxes(scaledImage, reduction)
-  local xminNew, yminNew, xmaxNew, ymaxNew = getExpectedBoundingBox(bboxes, probabilities, width, height, reduction , xdelta, ydelta)
-  return xminNew / scale, yminNew / scale , xmaxNew / scale, ymaxNew / scale
+  local xminNew, yminNew, xmaxNew, ymaxNew = getExpectedBoundingBox(bboxes, probabilities, width, height, reduction, xdelta, ydelta)
+  return xminNew / scale, yminNew / scale, xmaxNew / scale, ymaxNew / scale
 end
 
 
@@ -283,8 +283,8 @@ end
 function bboxlib.getImageBoundingBoxesTable(input)
   local reduction = 32
   local boundingBoxes = {}
-  xmin, ymin, xmax, ymax= getCroppedImage(input, reduction)
-  table.insert(boundingBoxes, {xmin, ymin, xmax, ymax} )
+  xmin, ymin, xmax, ymax = getCroppedImage(input, reduction)
+  table.insert(boundingBoxes, { xmin, ymin, xmax, ymax })
   return boundingBoxes
 end
 

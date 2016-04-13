@@ -10,70 +10,54 @@ require 'xlua'
 local tiefvision_commons = require 'tiefvision_commons'
 local classifier = require 'classifier-conv'
 
-local trainingLoss = 0.0
 local batchSize = 64
-local optimState = {
-  learningRate = 1e-2,
-  weightDecay = 0.0,
-  momentum = 0.1,
-  learningRateDecay = 1e-7
-}
 
 local inputsBatch = torch.Tensor(batchSize, 384, 11, 11):cuda()
 local targetsBatch = torch.Tensor(batchSize):cuda()
 
-function train(model, criterion, epochs)
-   model:training()
-   local trainIn = {}
-   for epoch = 1, epochs do
-     local time = sys.clock()
-     -- load the encoded input with their targets
-     -- local meanClass, loss = getTestError(model, criterion, testIn[2], testTarget[2])
-     -- print("TEST:" .. loss .. ':' .. meanClass)
-     print('==> doing epoch on training data:')
-     print("==> online epoch # " .. epoch .. ' [batchSize = ' .. batchSize .. ']')
-     math.randomseed(os.time())
-     local batchesIn1 = getBatchesInClassAndType(1, 'train')
-     local batchesIn2 = getBatchesInClassAndType(2, 'train')
-     for iter = 1, batchesIn1 + batchesIn2  do
-       print("Epoch " .. epoch  .. ". Batch Iteration: " .. iter)
-       local batchIndexClass1 = math.random(batchesIn1)
-       local batchIndexClass2 = math.random(batchesIn2)
-       local batchClass1 = torch.load(getFilename('train', 1, batchIndexClass1)):cuda()
-       local batchClass2 = torch.load(getFilename('train', 2, batchIndexClass2)):cuda()
-       local batches = {batchClass1, batchClass2}
-       for batchIndex = 1,batchSize do
-          -- select random class
-          local cl = math.random(2)
-          -- select random sample in batch
-          local sampleIndex = math.random(64)
-          inputsBatch[batchIndex] = batches[cl][sampleIndex]
-          targetsBatch[batchIndex] =  cl
-       end
-       -- print("==> online epoch # " .. epoch .. ' batch # ' .. b .. ']')
-       trainBatch(model, criterion, inputsBatch, targetsBatch)
-       print("TRAIN_LOSS:" .. trainingLoss)
-       if(iter % 10 == 0) then
-         local meanClass = getTestError(model, criterion)
-         print("TEST:" .. meanClass)
-         saveModelConv(model)
-       end
-     end
-     local meanClass = getTestError(model, criterion, testIn)
-     print("TEST:" .. meanClass)
-     saveModelConv(model)
-     time = sys.clock() - time
-     print("Time to learn full batch = " .. (time / (60 * 60)) .. " hours\n")
-     collectgarbage() 
+function train(model, criterion, epochs, optimState)
+  model:training()
+  for epoch = 1, epochs do
+    local time = sys.clock()
+    math.randomseed(os.time())
+    local batchesIn1 = getBatchesInClassAndType(1, 'train')
+    local batchesIn2 = getBatchesInClassAndType(2, 'train')
+    for iter = 1, batchesIn1 + batchesIn2 do
+      print("Epoch " .. epoch .. " out of " .. epochs .. ". Batch Iteration: " .. iter)
+      local batchIndexClass1 = math.random(batchesIn1)
+      local batchIndexClass2 = math.random(batchesIn2)
+      local batchClass1 = torch.load(getFilename('train', 1, batchIndexClass1)):cuda()
+      local batchClass2 = torch.load(getFilename('train', 2, batchIndexClass2)):cuda()
+      local batches = { batchClass1, batchClass2 }
+      for batchIndex = 1, batchSize do
+        -- select random class
+        local cl = math.random(2)
+        -- select random sample in batch
+        local sampleIndex = math.random(64)
+        inputsBatch[batchIndex] = batches[cl][sampleIndex]
+        targetsBatch[batchIndex] = cl
+      end
+      local trainingLoss = trainBatch(model, criterion, inputsBatch, targetsBatch, optimState)
+      if (iter % 10 == 0) then
+        local meanClass = getTestError(model)
+        print("Epoch: " .. epoch .. ". Batch: " .. iter .. ". Train Loss: " .. trainingLoss .. ". Test Accuracy: " .. meanClass)
+        saveModelConv(model)
+      end
+    end
+    local meanClass = getTestError(model)
+    print("Epoch: " .. epoch .. ". Train Loss: " .. trainingLoss .. ". Test Accuracy: " .. meanClass)
+    time = sys.clock() - time
+    print("Time to learn full batch = " .. (time / (60 * 60)) .. " hours\n")
+    collectgarbage()
   end
 end
 
 function getFilename(type, cl, i)
-  return '../data/classification/' .. cl .. '/' ..  type .. '/' .. i  .. '.data'
+  return '../data/classification/' .. cl .. '/' .. type .. '/' .. i .. '.data'
 end
 
-function getBatchesInClassAndType(class, type) 
-  local folder = '../data/classification/' .. class .. '/' ..  type 
+function getBatchesInClassAndType(class, type)
+  local folder = '../data/classification/' .. class .. '/' .. type
   local lines = tiefvision_commons.getFiles(folder)
   return #lines
 end
@@ -81,38 +65,38 @@ end
 function getDataFromClassAndType(class, type)
   local batches = getBatchesInClassAndType(class, type)
   local tensor = torch.Tensor(batches, 64, 384, 11, 11)
-  for l= 1, batches do
+  for l = 1, batches do
     local loadedTensor = torch.load(getFilename(type, class, l))
     tensor[l] = loadedTensor
-    collectgarbage() 
+    collectgarbage()
   end
-  return tensor:cuda() 
+  return tensor:cuda()
 end
 
-function getTestError(model, criterion, testIn)
-   local testIn = {}
-   testIn[1] = getDataFromClassAndType(1, 'test') 
-   testIn[2] = getDataFromClassAndType(2, 'test') 
-   local classified = 0
-   local elements = 0
-   for cl = 1, 2 do
-     local testInCl = testIn[cl]
-     for batch=1, testInCl:size()[1] do 
-       local output = model:forward(testInCl[batch])
-       output = torch.squeeze(output)
-       local firstIndex = maxIndex(output)
-       classified = classified + correctClassNum(firstIndex, cl)
-       elements = elements + testInCl[batch]:size()[1]
-     end
-   end
-   classified = classified / elements
-   return classified
+function getTestError(model)
+  local testIn = {}
+  testIn[1] = getDataFromClassAndType(1, 'test')
+  testIn[2] = getDataFromClassAndType(2, 'test')
+  local classified = 0
+  local elements = 0
+  for cl = 1, 2 do
+    local testInCl = testIn[cl]
+    for batch = 1, testInCl:size()[1] do
+      local output = model:forward(testInCl[batch])
+      output = torch.squeeze(output)
+      local firstIndex = maxIndex(output)
+      classified = classified + correctClassNum(firstIndex, cl)
+      elements = elements + testInCl[batch]:size()[1]
+    end
+  end
+  classified = classified / elements
+  return classified
 end
 
 function correctClassNum(maxIndex, cl)
   local correctClass = 0
   for e = 1, maxIndex:size()[1] do
-    if(maxIndex[e] == cl) then
+    if (maxIndex[e] == cl) then
       correctClass = correctClass + 1
     end
   end
@@ -124,8 +108,8 @@ function maxIndex(outputs)
   for e = 1, outputs:size()[1] do
     local output = outputs[e]
     local index = 1
-    for i=2, output:size()[1] do
-      if(output[i] > output[index]) then
+    for i = 2, output:size()[1] do
+      if (output[i] > output[index]) then
         index = i
       end
     end
@@ -136,13 +120,12 @@ end
 
 function saveModelConv(model)
   local filename = '../models/classifier.model'
-  print('==> saving model to ' ..  filename)
+  print('==> Saving Model: ' .. filename)
   torch.save(filename, model)
 end
 
-function trainBatch(model, criterion, inputsBatch, targetsBatch)
+function trainBatch(model, criterion, inputsBatch, targetsBatch, optimState)
   local parameters, gradParameters = model:getParameters()
-  -- create closure to evaluate E(X) and dE/dW
   local feval = function(x)
     if x ~= parameters then
       parameters:copy(x)
@@ -152,13 +135,11 @@ function trainBatch(model, criterion, inputsBatch, targetsBatch)
     local f = criterion:forward(outputs, targetsBatch)
     local df_do = criterion:backward(outputs, targetsBatch)
     model:backward(inputsBatch, df_do)
-    trainingLoss = f
     collectgarbage()
-    -- return E and dE/dW
     return f, gradParameters
   end
-  -- optimize on current mini-batch
-  optim.sgd(feval, parameters, optimState)
+  local x, fx = optim.sgd(feval, parameters, optimState)
+  return fx[1]
 end
 
 function loadCriterion()
@@ -171,9 +152,45 @@ function loadSavedModelConv()
   return torch.load('../models/classifier.model')
 end
 
---local model = loadSavedModelConv()
-local model = classifier.loadModel()
-local meanClass = getTestError(model, criterion)
-print("TEST:" .. meanClass)
+function getOptions()
+  local cmd = torch.CmdLine()
+  cmd:text()
+  cmd:text('Foreground and Background Classification Training')
+  cmd:text()
+  cmd:text('Options:')
+  cmd:option('-reset', false, 'Reset the saved model (if any) and use a new model.')
+  cmd:option('-epochs', 10, 'Number of epochs to train.')
+  -- optim state
+  cmd:option('-learningRate', 1e-2, 'Learning rate.')
+  cmd:option('-weightDecay',  0.0, 'Weight Decay (L1 regularization).')
+  cmd:option('-momentum', 0.1, 'Momentum.')
+  cmd:option('-learningRateDecay', 1e-7, 'Learning Rate Decay.')
+  cmd:text()
+  return cmd:parse(arg)
+end
+
+function getModel(options)
+  if (options.reset) then
+    return classifier.loadModel()
+  else
+    return loadSavedModelConv()
+  end
+end
+
+function getOptimSatate(options)
+  local optimState = {
+    learningRate = options.learningRate,
+    weightDecay = options.weightDecay,
+    momentum = options.momentum,
+    learningRateDecay = options.learningRateDecay
+  }
+  return optimState
+end
+
+local options = getOptions()
+local optimState = getOptimSatate(options)
+local model = getModel(options)
+local meanClass = getTestError(model)
+print("Test Accuracy:" .. meanClass)
 local criterion = loadCriterion()
-train(model, criterion, 10)
+train(model, criterion, options.epochs, optimState)

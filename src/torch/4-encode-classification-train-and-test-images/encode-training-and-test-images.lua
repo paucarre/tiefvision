@@ -44,14 +44,14 @@ function encodedInput(name, encoder)
 end
 
 function testSavedData(data)
-  for i=1,data:size()[1] do
-   assert(torch.mean(data[i]) > 0.01, 'the mean of the data should no be zero')
+  for i = 1, data:size()[1] do
+    assert(torch.mean(data[i]) > 0.01, 'the mean of the data should no be zero')
   end
 end
 
-function getFile(type, cl, i) 
-  return '../data/classification/' .. cl.. '/' ..  type .. '/' .. i  .. '.data' 
-end 
+function getFile(type, cl, i)
+  return '../data/classification/' .. cl .. '/' .. type .. '/' .. i .. '.data'
+end
 
 function encodeData(type, encoder)
   for cl = 1, 2 do

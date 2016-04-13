@@ -19,7 +19,6 @@ function generateDatabase(imageEncoder)
   local dataFolderFlipped = '../data/db/similarity/img-enc-cnn-encoder-flipped'
   local destFolderFlipped = '../data/db/similarity/img-flipped-similarity-deeprank'
   generateDatabaseForFolders(dataFolderFlipped, destFolderFlipped, imageEncoder)
-
 end
 
 function generateDatabaseForFolders(dataFolder, destFolder, imageEncoder)

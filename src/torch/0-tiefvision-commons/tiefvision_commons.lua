@@ -12,8 +12,8 @@ local lfs = require 'lfs'
 local tiefvision_commons = {}
 
 function tiefvision_commons.fileExists(name)
-   local f=io.open(name,"r")
-   if f~=nil then io.close(f) return true else return false end
+  local f = io.open(name, "r")
+  if f ~= nil then io.close(f) return true else return false end
 end
 
 function tiefvision_commons.getLines(filename)
@@ -22,7 +22,7 @@ function tiefvision_commons.getLines(filename)
   if trainFile then
     local index = 1
     for trainFileLine in trainFile:lines() do
-      if(tiefvision_commons.fileExists(trainFileLine)) then
+      if (tiefvision_commons.fileExists(trainFileLine)) then
         lines[index] = trainFileLine
         index = index + 1
       end
@@ -34,7 +34,7 @@ end
 function tiefvision_commons.getFiles(folder)
   local files = {}
   for file in lfs.dir(folder) do
-    if (lfs.attributes(folder .. '/' .. file,"mode") == "file") then
+    if (lfs.attributes(folder .. '/' .. file, "mode") == "file") then
       table.insert(files, file)
     end
   end
@@ -48,14 +48,14 @@ function tiefvision_commons.load_synset()
   while true do
     local line = file:read()
     if not line then break end
-    table.insert(list, string.sub(line,11))
+    table.insert(list, string.sub(line, 11))
   end
   return list
 end
 
 function tiefvision_commons.img_mean()
   local img_mean_name = '../models/ilsvrc_2012_mean.t7'
-  return torch.load(img_mean_name).img_mean:transpose(3,1)
+  return torch.load(img_mean_name).img_mean:transpose(3, 1)
 end
 
 function tiefvision_commons.load(imagePath)
@@ -74,8 +74,8 @@ function tiefvision_commons.preprocess(im)
   local scaledImage = im * 255
   -- converts RGB to BGR
   local bgrImage = scaledImage:clone()
-  bgrImage[{1,{},{}}] = scaledImage[{3,{},{}}]
-  bgrImage[{3,{},{}}] = scaledImage[{1,{},{}}]
+  bgrImage[{ 1, {}, {} }] = scaledImage[{ 3, {}, {} }]
+  bgrImage[{ 3, {}, {} }] = scaledImage[{ 1, {}, {} }]
 
   local imageMinusAvg = bgrImage - image.scale(img_mean, im:size()[2], im:size()[3], 'bilinear')
   return imageMinusAvg:cuda()

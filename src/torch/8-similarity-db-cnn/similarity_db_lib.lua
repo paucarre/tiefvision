@@ -18,7 +18,7 @@ function similarity_db_lib.encodeImage(imagePath, encoder)
   local input = image.load(imagePath)
   -- scale
   local inputWidth, inputHeight = input:size()[3], input:size()[2]
-  local inputScaled = image.scale(input, 224, inputHeight * 224.0 / inputWidth )
+  local inputScaled = image.scale(input, 224, inputHeight * 224.0 / inputWidth)
   -- encode
   local encoderInput = tiefvision_commons.loadImage(inputScaled)
   local encoderOutput = encoder:forward(encoderInput)[2]

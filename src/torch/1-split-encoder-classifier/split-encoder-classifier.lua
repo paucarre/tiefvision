@@ -54,12 +54,12 @@ assert(torch.eq(outputClassifier, output), 'the output of the network should be 
 
 -- test expected output
 local expectedOutput = torch.Tensor(4)
-expectedOutput[1]  = 2
-expectedOutput[2]  = 89
-expectedOutput[3]  = 91
-expectedOutput[4]  = 131
-for i=1, expectedOutput:size()[1] do
-  print(outputClassifier[i] .. ' ' .. expectedOutput[i] .. ' ' .. synset_words[outputClassifier[i] ] .. ' || ' .. synset_words[output[i] ])
+expectedOutput[1] = 2
+expectedOutput[2] = 89
+expectedOutput[3] = 91
+expectedOutput[4] = 131
+for i = 1, expectedOutput:size()[1] do
+  print(outputClassifier[i] .. ' ' .. expectedOutput[i] .. ' ' .. synset_words[outputClassifier[i]] .. ' || ' .. synset_words[output[i]])
   assert(outputClassifier[i] == expectedOutput[i], 'the network predicted an unexpected class')
 end
 

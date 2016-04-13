@@ -14,17 +14,17 @@ local similarity_lib = require 'similarity_lib'
 local similarity_db_lib = require 'similarity_db_lib'
 
 function getTestError(referenceEncoding)
-   local dataFolder = '../data/db/similarity/img-enc-cnn-encoder'
-   local testLines = tiefvision_commons.getFiles(dataFolder)
-   local comparisonTable = {}
-   for testIndex = 1, #testLines do
-     local file = testLines[testIndex]
-     local imageEncoding = torch.load(dataFolder .. '/' .. file):double()
-     local dist = similarity_lib.similarity(referenceEncoding, imageEncoding)
-     table.insert(comparisonTable, {file, dist})
-   end
-   table.sort(comparisonTable, sortCmpTable)
-   printCmpTable(comparisonTable)
+  local dataFolder = '../data/db/similarity/img-enc-cnn-encoder'
+  local testLines = tiefvision_commons.getFiles(dataFolder)
+  local comparisonTable = {}
+  for testIndex = 1, #testLines do
+    local file = testLines[testIndex]
+    local imageEncoding = torch.load(dataFolder .. '/' .. file):double()
+    local dist = similarity_lib.similarity(referenceEncoding, imageEncoding)
+    table.insert(comparisonTable, { file, dist })
+  end
+  table.sort(comparisonTable, sortCmpTable)
+  printCmpTable(comparisonTable)
 end
 
 function sortCmpTable(a, b)

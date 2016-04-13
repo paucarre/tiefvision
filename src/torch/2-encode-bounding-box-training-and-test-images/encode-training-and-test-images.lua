@@ -17,7 +17,7 @@ function loadData(encoder, filename)
   local inputsBatch = {}
   local lines = getLines(filename)
   local batchSize = 320
-  local batches =  math.ceil(#lines / batchSize)
+  local batches = math.ceil(#lines / batchSize)
   local linesIndex = 1
   for i = 1, batches do
     local currentBatchSize = batchSize
@@ -69,22 +69,22 @@ end
 function testStdDevNonZero(size, folder)
   for ig = 1, size do
     local data = loadDataFromFolder(folder, ig)
-    for i=1,data:size()[1] do
-     assert(torch.std(data[i]) > 5.0, 'the standard deviation of the data should not be zero')
+    for i = 1, data:size()[1] do
+      assert(torch.std(data[i]) > 5.0, 'the standard deviation of the data should not be zero')
     end
   end
 end
 
 function stats(output)
   local globalMean = torch.zeros(4):cuda()
-  local globalStd  = torch.zeros(4):cuda()
-  for i = 1,#output do
+  local globalStd = torch.zeros(4):cuda()
+  for i = 1, #output do
     local mean = torch.mean(output[i], 1):cuda()
     local std = torch.std(output[i], 1):cuda()
     globalMean = torch.add(globalMean, mean[1])
-    globalStd  = torch.add(globalStd, std[1])
+    globalStd = torch.add(globalStd, std[1])
   end
-  return globalMean / #output , globalStd / #output
+  return globalMean / #output, globalStd / #output
 end
 
 function postprocessOutput(output, mean, std)
@@ -131,7 +131,7 @@ end
 function testBoundingBoxes(trainout, trainoutProc)
   for i = 1, #trainout do
     local reconstructedBoundingBox = getBoundingBoxes(trainoutProc[i])
-    assert(torch.mean(torch.abs(reconstructedBoundingBox -trainout[i])) < 0.0001, 'the reconstructed bounding box should be the original one')
+    assert(torch.mean(torch.abs(reconstructedBoundingBox - trainout[i])) < 0.0001, 'the reconstructed bounding box should be the original one')
   end
 end
 
@@ -156,12 +156,12 @@ function saveEncodedData()
 
   for i = 1, #testin do
     local testoutTr = testoutProc[i]:transpose(1, 2)
-    torch.save('../data/bbox-test-in/'   .. i .. '.data', testin[i])
-    torch.save('../data/bbox-test-out/'  .. i .. '.data', testoutTr)
+    torch.save('../data/bbox-test-in/' .. i .. '.data', testin[i])
+    torch.save('../data/bbox-test-out/' .. i .. '.data', testoutTr)
   end
   for i = 1, #trainin do
     local trainoutTr = trainoutProc[i]:transpose(1, 2)
-    torch.save('../data/bbox-train-in/'  .. i .. '.data', trainin[i])
+    torch.save('../data/bbox-train-in/' .. i .. '.data', trainin[i])
     torch.save('../data/bbox-train-out/' .. i .. '.data', trainoutTr)
   end
   return testin, testoutProc, trainin, trainoutProc, trainout
