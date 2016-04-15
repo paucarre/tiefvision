@@ -3,7 +3,7 @@
 * You may use, distribute and modify this code under the
 * terms of the GPL v2 license (http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt).
 *@
-@(images: Seq[String], page: Int, pageGroup: Int, pageGroups: Int)
+@(images: Seq[String], isSupervised: Boolean, page: Int, pageGroup: Int, pageGroups: Int)
 <html>
 <head>
   <style>
@@ -45,17 +45,17 @@
   <ul class="pagination">
     <li>
       @if(pageGroup > 1) {
-      <a href="@routes.Application.similarityGallery(1, pageGroup - 1)" aria-label="Previous">
+      <a href="@routes.Application.similarityGallery(isSupervised, 1, pageGroup - 1)" aria-label="Previous">
         <span aria-hidden="true">&laquo;</span>
       </a>
       }
     </li>
     @for(pageIndex <- (1 to 20)) {
-    <li><a href="@routes.Application.similarityGallery(pageIndex, pageGroup)">@pageIndex</a></li>
+    <li><a href="@routes.Application.similarityGallery(isSupervised, pageIndex, pageGroup)">@pageIndex</a></li>
     }
     @if(pageGroup < pageGroups) {
     <li>
-      <a href="@routes.Application.similarityGallery(1, pageGroup + 1)" aria-label="Next">
+      <a href="@routes.Application.similarityGallery(isSupervised, 1, pageGroup + 1)" aria-label="Next">
         <span aria-hidden="true">&raquo;</span>
       </a>
     </li>
@@ -68,7 +68,7 @@
   <div>
     @for(image <- imageGroup) {
     <div class="item">
-      <a href="/similarity_finder_for/@{image}">
+      <a href="@{routes.Application.similarityFinderFor(image, false)}">
         <img id="@{image}" class="img-thumbnail image" src="/dresses_db/@{image}"/>
       </a>
       <span class="caption">@{image}</span>

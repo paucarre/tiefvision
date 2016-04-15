@@ -3,7 +3,7 @@
 * You may use, distribute and modify this code under the
 * terms of the GPL v2 license (http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt).
 *@
-@(imageSearchResult: core.ImageSearchResult, masterBase: String, bboxBase: String)
+@(imageSearchResult: core.ImageSearchResult, isSupervised: Boolean, masterBase: String, bboxBase: String)
 @imageSearchResultDisplay = @{imageSearchResult.distanceToSimilarImages.take(5)}
 <!DOCTYPE html>
 <html lang="en">
@@ -55,35 +55,35 @@
 <div class="container-result">
   <div class="item-result">
     <h5 class="title-result">Closest Dress</h5>
-    <a href="/similarity_finder_for/@{imageSearchResultDisplay(0)._2}">
+    <a href="@{routes.Application.similarityFinderFor(imageSearchResultDisplay(0)._2, isSupervised)}">
       <img id="result-1" class="img-thumbnail img-result"
            src="/dresses_db/@{imageSearchResultDisplay(0)._2}"/>
     </a>
   </div><!--/.col-xs-6.col-lg-4-->
   <div class="item-result">
     <h5 class="title-result">Second Closest Dress</h5>
-    <a href="/similarity_finder_for/@{imageSearchResultDisplay(1)._2}">
+    <a href="@{routes.Application.similarityFinderFor(imageSearchResultDisplay(1)._2, isSupervised)}">
       <img id="result-2" class="img-thumbnail img-result"
            src="/dresses_db/@{imageSearchResultDisplay(1)._2}"/>
     </a>
   </div><!--/.col-xs-6.col-lg-4-->
   <div class="item-result">
     <h5 class="title-result">Third Closest Dress</h5>
-    <a href="/similarity_finder_for/@{imageSearchResultDisplay(2)._2}">
+    <a href="@{routes.Application.similarityFinderFor(imageSearchResultDisplay(2)._2, isSupervised)}">
       <img id="result-3" class="img-thumbnail img-result"
            src="/dresses_db/@{imageSearchResultDisplay(2)._2}"/>
     </a>
   </div><!--/.col-xs-6.col-lg-4-->
   <div class="item-result">
     <h5 class="title-result">Fourth Closest Dress</h5>
-    <a href="/similarity_finder_for/@{imageSearchResultDisplay(3)._2}">
+    <a href="@{routes.Application.similarityFinderFor(imageSearchResultDisplay(3)._2, isSupervised)}">
       <img id="result-4" class="img-thumbnail img-result"
            src="/dresses_db/@{imageSearchResultDisplay(3)._2}"/>
     </a>
   </div><!--/.col-xs-6.col-lg-4-->
   <div class="item-result">
     <h5 class="title-result">Fifth Closest Dress</h5>
-    <a href="/similarity_finder_for/@{imageSearchResultDisplay(4)._2}">
+    <a href="@{routes.Application.similarityFinderFor(imageSearchResultDisplay(4)._2, isSupervised)}">
       <img id="result-5" class="img-thumbnail img-result"
            src="/dresses_db/@{imageSearchResultDisplay(4)._2}"/>
     </a>

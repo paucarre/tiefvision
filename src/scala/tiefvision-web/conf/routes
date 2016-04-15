@@ -13,10 +13,11 @@ GET     /generate_bounding_box_train_and_test_files      controllers.Application
 GET     /generate_classification_train_and_test_files    controllers.Application.generateClassificationTrainAndTestFiles()
 
 # Similarity finder
-GET     /                                            controllers.Application.similarityGallery(page: Int = 1, pageGroup : Int = 1)
-GET     /similarity_gallery/:page/:pageGroup         controllers.Application.similarityGallery(page: Int, pageGroup : Int)
-GET     /similarity_finder                           controllers.Application.similarityFinder()
-GET     /similarity_finder_for/:image                controllers.Application.similarityFinderFor(image: String)
+GET     /                                                    controllers.Application.similarityGallery(isSupervised: Boolean = false, page: Int = 1, pageGroup : Int = 1)
+GET     /similarity_gallery/:isSupervised/:page/:pageGroup   controllers.Application.similarityGallery(isSupervised: Boolean, page: Int, pageGroup : Int)
+GET     /similarity_finder/supervised                controllers.Application.similarityFinder(isSupervised: Boolean ?= true)
+GET     /similarity_finder/unsupervised              controllers.Application.similarityFinder(isSupervised: Boolean ?= false)
+GET     /similarity_finder_for                       controllers.Application.similarityFinderFor(image: String, isSupervised: Boolean)
 
 # Similarity editor
 GET     /similarity_editor                 controllers.Application.similarityEditor()

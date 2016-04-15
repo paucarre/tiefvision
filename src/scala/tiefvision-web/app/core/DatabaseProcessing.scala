@@ -10,8 +10,10 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.{Files, Paths}
 
 import controllers.Configuration
+import core.ImageProcessing.SimilarityFinder
 import db.Dataset._
 import db.{Dataset, _}
+
 import scala.concurrent.ExecutionContext.Implicits.global
 
 object DatabaseProcessing {
@@ -27,7 +29,7 @@ object DatabaseProcessing {
     SimilarityQueryActions.getAllSimilarities().map { allSimilarities =>
       allSimilarities.foldLeft(Accuracy())((accuracy, similarity) => {
         val imageToDist = ImageProcessing.findSimilarImages(similarity.reference,
-          ImageProcessing.findSimilarImagesFromDbFolder).distanceToSimilarImages.map(e => e._2 -> e._1).toMap
+          SimilarityFinder.getSimilarityFinder(false)).distanceToSimilarImages.map(e => e._2 -> e._1).toMap
         val isCorrect = for {
           positiveDist <- imageToDist.get(similarity.positive)
           negativeDist <- imageToDist.get(similarity.negative)
@@ -98,7 +100,7 @@ object DatabaseProcessing {
 
   private def addFlippedSimilarity(flippedSimilarityToAdd: String) = {
     val closestImageOpt = ImageProcessing.findSimilarImages(flippedSimilarityToAdd,
-      ImageProcessing.findSimilarImagesFromDbFolder).distanceToSimilarImages.headOption
+      SimilarityFinder.getSimilarityFinder(true)).distanceToSimilarImages.headOption
     closestImageOpt.map { closestImage =>
       val closestImageName = closestImage._2
       SimilarityQueryActions.insertOrUpdate(

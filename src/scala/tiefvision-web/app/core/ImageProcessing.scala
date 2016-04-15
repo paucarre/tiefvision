@@ -28,23 +28,27 @@ object ImageProcessing {
     val finderProcessBuilder = Process(Seq("bash", "-c", s"luajit search.lua $imagesFolderOptionOpt -image $image"), new File(finderFolder))
     val finderProcessOutput: String = finderProcessBuilder.!!
     val data = {
-      def reduce(lines : Seq[(String, Double)], line: String): Seq[(String, Double)] = {
+      def reduce(lines: Seq[(String, Double)], line: String): Seq[(String, Double)] = {
         similarityLineToSimilarityResult(line) match {
-          case Some((file: String, similarity: Double)) => lines :+ (file: String, similarity: Double)
+          case Some((file: String, similarity: Double)) => lines :+(file: String, similarity: Double)
           case None => lines
         }
       }
       finderProcessOutput.lines.foldLeft(Seq[(String, Double)]())(reduce)
     }
-    val similaritySimilarityMap = data.map(e  => {
-        val (file: String, similarity : Double) = e
-        similarity -> file
-      }).sortBy(-_._1)
+    val similaritySimilarityMap = data.map(e => {
+      val (file: String, similarity: Double) = e
+      similarity -> file
+    }).sortBy(-_._1)
     ImageSearchResult(image, similaritySimilarityMap)
   }
 
-  val findSimilarImagesFromDbFolder =  s"${Configuration.HomeFolder}/src/torch/10-similarity-searcher-cnn-db"
-//  val findSimilarImagesFromDbFolder =  s"${Configuration.HomeFolder}/src/torch/15-deeprank-searcher-db"
+  object SimilarityFinder {
+    def getSimilarityFinder(isSupervised: Boolean) = {
+      if(isSupervised) s"${Configuration.HomeFolder}/src/torch/15-deeprank-searcher-db"
+      else s"${Configuration.HomeFolder}/src/torch/10-similarity-searcher-cnn-db"
+    }
+  }
 
   val findSimilarImagesFromFileFolder = s"${Configuration.HomeFolder}/src/torch/11-similarity-searcher-cnn-file"
 
@@ -67,7 +71,7 @@ object ImageProcessing {
     }
   }
 
-  def boundingBoxTypeFolder(extendBoundingBox: Boolean) = if(extendBoundingBox) "extended" else "original"
+  def boundingBoxTypeFolder(extendBoundingBox: Boolean) = if (extendBoundingBox) "extended" else "original"
 
   def generateBackgroundCrops(scaledBoundingBox: BoundingBox, scale: Int, extendBoundingBox: Boolean) = {
     import sys.process._

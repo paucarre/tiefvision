@@ -17,8 +17,8 @@ class Application extends Controller {
 
   def index = editBoundingBox(randomImage)
 
-  def similarityGallery(page: Int = 1, pageGroup: Int = 1) = Action {
-    Ok(views.html.similarityGallery(ImagesGrouped(((pageGroup - 1) * 20) + (page - 1)), page, pageGroup, ImagesGrouped.size / 20))
+  def similarityGallery(isSupervised: Boolean, page: Int = 1, pageGroup: Int = 1) = Action {
+    Ok(views.html.similarityGallery(ImagesGrouped(((pageGroup - 1) * 20) + (page - 1)), isSupervised, page, pageGroup, ImagesGrouped.size / 20))
   }
 
   def similarityFinderUploadForm() = Action {
@@ -28,7 +28,8 @@ class Application extends Controller {
   def similarityFinderUploadResults(image: String) = Action {
     val imageSearchResult = findSimilarImages(image, findSimilarImagesFromFileFolder,
       Some(s"${Configuration.HomeFolder}/${Configuration.UploadedImagesFolder}"))
-    Ok(views.html.similarityFinder(imageSearchResult, "uploaded_dresses_db", "uploaded_bboxes_db"))
+    //TODO: supervised is hardcoded to true
+    Ok(views.html.similarityFinder(imageSearchResult, true, "uploaded_dresses_db", "uploaded_bboxes_db"))
   }
 
   def upload = Action(parse.multipartFormData) { request =>
@@ -45,20 +46,24 @@ class Application extends Controller {
     }
   }
 
-  def similarityFinder() = Action {
-    val imageSearchResult = findSimilarImages(randomSmilarityImage, findSimilarImagesFromDbFolder)
-    Ok(views.html.similarityFinder(imageSearchResult, "dresses_db", "bboxes_db"))
+  def similarityFinder(isSupervised: Boolean = false) = Action {
+    val imageSearchResult = findSimilarImages(randomSmilarityImage, SimilarityFinder.getSimilarityFinder(isSupervised))
+    Ok(views.html.similarityFinder(imageSearchResult, isSupervised, "dresses_db", "bboxes_db"))
   }
 
-  def similarityFinderFor(image: String) = Action {
-    val imageSearchResult = findSimilarImages(image, findSimilarImagesFromDbFolder)
-    Ok(views.html.similarityFinder(imageSearchResult, "dresses_db", "bboxes_db"))
+  def supervisedSimilarityFinderFor(image: String) = similarityFinderFor(image, true)
+
+  def unsupervisedSimilarityFinderFor(image: String) = similarityFinderFor(image, false)
+
+  def similarityFinderFor(image: String, isSupervised: Boolean) = Action {
+    val imageSearchResult = findSimilarImages(image, SimilarityFinder.getSimilarityFinder(isSupervised))
+    Ok(views.html.similarityFinder(imageSearchResult, isSupervised, "dresses_db", "bboxes_db"))
   }
 
-  def similarityEditor() = similarityEditorFor(randomSmilarityImage)
+  def similarityEditor(isSupervised: Boolean = false) = similarityEditorFor(randomSmilarityImage)
 
   def similarityEditorFor(image: String) = Action.async {
-    val imageSearchResult = findSimilarImages(image, findSimilarImagesFromDbFolder)
+    val imageSearchResult = findSimilarImages(image, SimilarityFinder.getSimilarityFinder(true))
     SimilarityQueryActions.getSimilarityByReference(image).map { similarity =>
       Ok(views.html.similarityEditor(imageSearchResult, "dresses_db", "bboxes_db",
         similarity.map(_.positive), similarity.map(_.negative)))
