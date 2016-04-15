@@ -183,7 +183,7 @@ end
 function getProbabilities(encodedInput)
   local classifier = loadClassifier()
   local classes = classifier:forward(encodedInput)
-  return classes[2]
+  return classes[1]
 end
 
 function bboxlib.loadImageFromFile(imagePath)
