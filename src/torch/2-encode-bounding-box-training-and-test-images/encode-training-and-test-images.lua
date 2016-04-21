@@ -123,7 +123,7 @@ end
 
 function saveEncodedData()
   local encoder = torch.load('../models/encoder.model')
-  local trainin, trainout = loadData(encoder, '../../../resources/bounding-boxes/TRAIN.txt')
+  local trainin, trainout = loadData(encoder, '../../../resources/bounding-boxes/extendedTRAIN.txt')
   local mean, std = stats(trainout, meanfile, stdfile)
   torch.save('../models/bbox-train-mean', mean)
   torch.save('../models/bbox-train-std', std)
@@ -134,7 +134,7 @@ function saveEncodedData()
   assert(math.abs(torch.mean(stdtest) - 1) < 0.0001, 'std should be one')
 
 
-  local testin, testout = loadData(encoder, '../../../resources/bounding-boxes/TEST.txt')
+  local testin, testout = loadData(encoder, '../../../resources/bounding-boxes/extendedTEST.txt')
   local testoutProc = postprocessOutput(testout, mean, std)
   local meantest, stdtest = stats(testoutProc)
   assert(torch.mean(meantest) < 0.2, 'test mean should be close to zero')

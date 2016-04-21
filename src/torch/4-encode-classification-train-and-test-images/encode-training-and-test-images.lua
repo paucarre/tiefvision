@@ -11,7 +11,7 @@ local tiefvision_commons = require 'tiefvision_commons'
 local batch_size = 64
 
 -- TODO: we are wasting at most 63 samples due to batching
-function loadData(encoder, lines, cl)
+function loadData(encoder, lines)
   local batches = #lines / batch_size
   local inputs = torch.Tensor(batches, batch_size, 384, 11, 11):cuda()
   for batch = 1, batches do
@@ -27,10 +27,10 @@ end
 
 function getFilesAsTable(prefix)
   local trainingFiles = {}
-  for cl = 1, 2 do
-    local lines = tiefvision_commons.getLines("../../../resources/classification-images/crops/" .. cl .. "-" .. prefix .. ".txt")
-    print("../../../resources/classification-images/crops/" .. cl .. "-" .. prefix .. ".txt :" .. #lines)
-    trainingFiles[cl] = lines
+  for cl = 0, 1 do
+    local lines = tiefvision_commons.getLines("../../../resources/bounding-boxes/" .. cl .. "-" .. prefix .. ".txt")
+    print("../../../resources/bounding-boxes/" .. cl .. "-" .. prefix .. ".txt :" .. #lines)
+    trainingFiles[cl + 1] = lines
   end
   return trainingFiles
 end
@@ -54,11 +54,12 @@ function getFile(type, cl, i)
 end
 
 function encodeData(type, encoder)
-  for cl = 1, 2 do
+  for cl = 0, 1 do
     local files = getFilesAsTable(type)
-    print('Class ' .. cl .. ' with files ' .. #files[cl])
-    local input = loadData(encoder, files[cl], cl)
+    print('Class ' .. cl .. ' with files ' .. #files[cl + 1])
+    local input = loadData(encoder, files[cl + 1])
     input = input:double()
+    print(input:size())
     for i = 1, input:size()[1] do
       print("Saving batch " .. i .. " for " .. type)
       torch.save(getFile(type, cl, i), input[i]:clone()) -- use clone as otherwise it saves the whole tensor

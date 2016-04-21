@@ -168,7 +168,7 @@ object DatabaseProcessing {
       .map(file => s"$cropsFolderName/${file.getName}").mkString("\n")
 
     val writer = new BufferedWriter(new OutputStreamWriter(
-      new FileOutputStream(s"${Configuration.HomeFolder}/${Configuration.ClassificationFolder}/13-${dataset.toString.toLowerCase}.txt"), "utf-8"))
+      new FileOutputStream(s"${Configuration.HomeFolder}/${Configuration.BoundingBoxesFolder}/1-${dataset.toString.toLowerCase}.txt"), "utf-8"))
     writer.write(content)
     writer.close()
   }
@@ -182,7 +182,7 @@ object DatabaseProcessing {
       .map(file => s"$cropsFolderName/${file.getName}").mkString("\n")
 
     val writer = new BufferedWriter(new OutputStreamWriter(
-      new FileOutputStream(s"${Configuration.HomeFolder}/${Configuration.ClassificationFolder}/1-${dataset.toString.toLowerCase}.txt"), "utf-8"))
+      new FileOutputStream(s"${Configuration.HomeFolder}/${Configuration.BoundingBoxesFolder}/0-${dataset.toString.toLowerCase}.txt"), "utf-8"))
     writer.write(content)
     writer.close()
   }

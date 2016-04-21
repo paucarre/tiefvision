@@ -11,6 +11,7 @@
 package.path = package.path .. ';../0-tiefvision-commons/?.lua'
 require 'loadcaffe'
 require 'image'
+require 'inn'
 tiefvision_commons = require 'tiefvision_commons'
 
 local proto_name = 'deploy.prototxt'

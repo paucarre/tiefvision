@@ -7,7 +7,6 @@ object Configuration {
   lazy val HomeFolder = sys.env("TIEFVISION_HOME")
   val CropSize = 224
   val NumSamples = 5
-  val ClassificationFolder = "resources/classification-images/crops"
   val BoundingBoxesFolder = "resources/bounding-boxes"
   val ScaledImagesFolder = "resources/bounding-boxes/scaled-images"
   val CropImagesFolder = "resources/bounding-boxes/crops"

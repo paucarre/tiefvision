@@ -78,7 +78,7 @@ object ImageProcessing {
     if (scaledBoundingBox.width >= Configuration.CropSize && scaledBoundingBox.height >= Configuration.CropSize) {
       var samples = 0
       var attempts = 0
-      while (samples < Configuration.NumSamples && attempts < Configuration.NumSamples * 2) {
+      while (samples < Configuration.NumSamples && attempts < Configuration.NumSamples * 5) {
         attempts = attempts + 1
         val randomCrop = generateRandomCrop(scaledBoundingBox)
         if (!randomCrop.intersectsWith(scaledBoundingBox.toCrop)) {
@@ -100,7 +100,7 @@ object ImageProcessing {
     if (scaledBoundingBox.width >= Configuration.CropSize && scaledBoundingBox.height >= Configuration.CropSize) {
       var samples = 0
       var attempts = 0
-      while (samples < Configuration.NumSamples && attempts < Configuration.NumSamples) {
+      while (samples < Configuration.NumSamples && attempts < Configuration.NumSamples * 5) {
         attempts = attempts + 1
         val extendedBoundingBox = {
           if (extendBoundingBox)
