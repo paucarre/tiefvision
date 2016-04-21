@@ -1,3 +1,4 @@
+db/
 *.jpg
 *.t7
 *.model
@@ -22,7 +23,6 @@ resources
 data
 deprecated
 src/scala/tiefvision-web/public/bootstrap-3.3.6-dist
-src/scala/tiefvision-web/public/css
 src/scala/tiefvision-web/public/images
 src/scala/tiefvision-web/public/javascripts/bootstrap.min.js
 src/scala/tiefvision-web/public/javascripts/jquery-2.2.0.js
