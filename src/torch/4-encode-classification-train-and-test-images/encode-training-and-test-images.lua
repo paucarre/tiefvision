@@ -59,7 +59,6 @@ function encodeData(type, encoder)
     print('Class ' .. cl .. ' with files ' .. #files[cl + 1])
     local input = loadData(encoder, files[cl + 1])
     input = input:double()
-    print(input:size())
     for i = 1, input:size()[1] do
       print("Saving batch " .. i .. " for " .. type)
       torch.save(getFile(type, cl, i), input[i]:clone()) -- use clone as otherwise it saves the whole tensor

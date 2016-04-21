@@ -12,7 +12,7 @@ local classifierconv = {}
 function classifierconv.loadModel()
   local nhiddens1 = 1024
   local nhiddens2 = 128 -- 256
-  local noutputs = 16
+  local noutputs = 2
   local model = nn.Sequential()
   model:add(nn.SpatialConvolutionMM(384, nhiddens1, 11, 11, 1, 1, 0, 0))
   model:add(nn.ReLU(true))

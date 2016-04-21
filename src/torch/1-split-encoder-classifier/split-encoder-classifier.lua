@@ -84,6 +84,6 @@ print("Saving models...")
 
 torch.save('../models/net.model', net)
 torch.save('../models/encoder.model', encoder)
-torch.save('../models/classifier.model', classifier)
+torch.save('../models/classifier-original.model', classifier)
 
 print("Finished!")

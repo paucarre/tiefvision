@@ -23,7 +23,6 @@ function train(model, criterion, epochs, optimState)
     local batchesIn1 = getBatchesInClassAndType(1, 'train')
     local batchesIn2 = getBatchesInClassAndType(2, 'train')
     for iter = 1, batchesIn1 + batchesIn2 do
-      print("Epoch " .. epoch .. " out of " .. epochs .. ". Batch Iteration: " .. iter)
       local batchIndexClass1 = math.random(batchesIn1)
       local batchIndexClass2 = math.random(batchesIn2)
       local batchClass1 = torch.load(getFilename('train', 1, batchIndexClass1)):cuda()
@@ -42,6 +41,8 @@ function train(model, criterion, epochs, optimState)
         local meanClass = getTestError(model)
         print("Epoch: " .. epoch .. ". Batch: " .. iter .. ". Train Loss: " .. trainingLoss .. ". Test Accuracy: " .. meanClass)
         saveModelConv(model)
+      else
+        print("Epoch " .. epoch .. " out of " .. epochs .. ". Batch Iteration: " .. iter .. ". Train Loss: " .. trainingLoss)
       end
     end
     local meanClass = getTestError(model)
@@ -53,11 +54,11 @@ function train(model, criterion, epochs, optimState)
 end
 
 function getFilename(type, cl, i)
-  return '../data/classification/' .. cl .. '/' .. type .. '/' .. i .. '.data'
+  return '../data/classification/' .. (cl - 1) .. '/' .. type .. '/' .. i .. '.data'
 end
 
 function getBatchesInClassAndType(class, type)
-  local folder = '../data/classification/' .. class .. '/' .. type
+  local folder = '../data/classification/' .. (class - 1) .. '/' .. type
   local lines = tiefvision_commons.getFiles(folder)
   return #lines
 end
@@ -108,7 +109,7 @@ function maxIndex(outputs)
   for e = 1, outputs:size()[1] do
     local output = outputs[e]
     local index = 1
-    for i = 2, output:size()[1] do
+    for i = 1, output:size()[1] do
       if (output[i] > output[index]) then
         index = i
       end
