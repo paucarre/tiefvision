@@ -25,9 +25,9 @@ function getInitialRefIndex(similarities)
 end
 
 function similarityDb()
-  local dataFolder = '../data/db/similarity/img-enc-cnn-encoder'
+  local dataFolder = '../data/encoded-images'
   local testLines = tiefvision_commons.getFiles(dataFolder)
-  local similarities = torch.load('../data/db/similarity/img-unsup-similarity-db')
+  local similarities = torch.load('../data/img-unsup-similarity-db')
   local initialReferenceIndex = getInitialRefIndex(similarities)
   print('Initial Reference Index: ' .. initialReferenceIndex)
   for referenceIndex = initialReferenceIndex, #testLines do
@@ -45,13 +45,13 @@ function similarityDb()
       end
     end
     -- compare itself with its mirror
-    local flippedEncoding = torch.load('../data/db/similarity/img-enc-cnn-encoder-flipped/' .. reference):double()
+    local flippedEncoding = torch.load('../data/encoded-images-flipped/' .. reference):double()
     local similarity = similarity_lib.similarity(referenceEncoding, flippedEncoding)
     if (similarity) then
       similarities[referenceIndex][referenceIndex] = similarity
       -- print('DIST( ' .. reference .. ', ' .. reference .. ' ) = ' .. similarity)
     end
-    torch.save('../data/db/similarity/img-unsup-similarity-db', similarities)
+    torch.save('../data/img-unsup-similarity-db', similarities)
     if referenceIndex % 5 == 0 then
       collectgarbage()
     end

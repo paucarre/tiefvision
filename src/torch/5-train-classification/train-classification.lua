@@ -18,7 +18,6 @@ local targetsBatch = torch.Tensor(batchSize):cuda()
 function train(model, criterion, epochs, optimState)
   model:training()
   for epoch = 1, epochs do
-    local time = sys.clock()
     math.randomseed(os.time())
     local batchesIn1 = getBatchesInClassAndType(1, 'train')
     local batchesIn2 = getBatchesInClassAndType(2, 'train')
@@ -44,12 +43,8 @@ function train(model, criterion, epochs, optimState)
       else
         print("Epoch " .. epoch .. " out of " .. epochs .. ". Batch Iteration: " .. iter .. ". Train Loss: " .. trainingLoss)
       end
-    end
-    local meanClass = getTestError(model)
-    print("Epoch: " .. epoch .. ". Train Loss: " .. trainingLoss .. ". Test Accuracy: " .. meanClass)
-    time = sys.clock() - time
-    print("Time to learn full batch = " .. (time / (60 * 60)) .. " hours\n")
     collectgarbage()
+    end
   end
 end
 
