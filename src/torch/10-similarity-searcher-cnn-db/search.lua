@@ -12,8 +12,8 @@ local tiefvision_commons = require 'tiefvision_commons'
 local search_commons = require 'search_commons'
 
 function getTestError(reference)
-  local dataFolder = '../data/db/similarity/img-enc-cnn-encoder'
-  local similarityDb = '../data/db/similarity/img-unsup-similarity-db'
+  local dataFolder = '../data/encoded-images'
+  local similarityDb = '../data/img-unsup-similarity-db'
   local testLines = tiefvision_commons.getFiles(dataFolder)
   local similarities = torch.load(similarityDb):double()
   local referenceIndex = search_commons.getIndex(testLines, reference)

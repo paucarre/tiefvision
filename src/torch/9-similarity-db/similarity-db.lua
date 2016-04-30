@@ -27,7 +27,11 @@ end
 function similarityDb()
   local dataFolder = '../data/encoded-images'
   local testLines = tiefvision_commons.getFiles(dataFolder)
-  local similarities = torch.load('../data/img-unsup-similarity-db')
+  local similaritiesDbPath = '../data/img-unsup-similarity-db'
+  local similarities = torch.ones(#testLines, #testLines) * -1
+  if(tiefvision_commons.fileExists(similaritiesDbPath)) then
+    similarities = torch.load(similaritiesDbPath)
+  end
   local initialReferenceIndex = getInitialRefIndex(similarities)
   print('Initial Reference Index: ' .. initialReferenceIndex)
   for referenceIndex = initialReferenceIndex, #testLines do
@@ -51,7 +55,7 @@ function similarityDb()
       similarities[referenceIndex][referenceIndex] = similarity
       -- print('DIST( ' .. reference .. ', ' .. reference .. ' ) = ' .. similarity)
     end
-    torch.save('../data/img-unsup-similarity-db', similarities)
+    torch.save(similaritiesDbPath, similarities)
     if referenceIndex % 5 == 0 then
       collectgarbage()
     end
