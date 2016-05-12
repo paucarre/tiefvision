@@ -10,6 +10,7 @@
 local image = require 'image'
 local lfs = require 'lfs'
 local tiefvision_commons = {}
+local tiefvision_home  = os.getenv("TIEFVISION_HOME")
 
 function tiefvision_commons.fileExists(name)
   local f = io.open(name, "r")
@@ -18,10 +19,12 @@ end
 
 function tiefvision_commons.getLines(filename)
   local trainFile = io.open(filename)
+  print(trainFile)
   local lines = {}
   if trainFile ~= nil then
     local index = 1
     for trainFileLine in trainFile:lines() do
+      print(trainFileLine)
       if (tiefvision_commons.fileExists(trainFileLine)) then
         lines[index] = trainFileLine
         index = index + 1
@@ -56,7 +59,7 @@ function tiefvision_commons.load_synset()
 end
 
 function tiefvision_commons.img_mean()
-  local img_mean_name = '../models/ilsvrc_2012_mean.t7'
+  local img_mean_name = tiefvision_home .. '/src/torch/models/ilsvrc_2012_mean.t7'
   return torch.load(img_mean_name).img_mean:transpose(3, 1)
 end
 
