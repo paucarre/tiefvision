@@ -103,4 +103,4 @@ Please refer to the [Developer Guide](doc/developer.md) for details.
 ## Copyright
 Copyright (C) 2016 Pau Carré Cardona - All Rights Reserved
 You may use, distribute and modify this code under the
-terms of the [GPL v2 license](http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt).
+terms of the [Apache License v2](http://www.apache.org/licenses/LICENSE-2.0.txt).
