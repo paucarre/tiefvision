@@ -5,11 +5,24 @@
   */
 package controllers
 
+import java.io.File
 import com.google.inject.Inject
-import play.api.{Play, Environment}
+import play.api.{Environment, Logger, Play}
+import play.api.mvc._
 
-class TiefVisionResourcesAssets @Inject()(environment: Environment) extends ExternalAssets {
+class TiefVisionResourcesAssets @Inject()(environment: Environment) extends Controller {
 
-  def atResources(rootPath: String, file: String) = super.at(s"${Configuration.HomeFolder}/$rootPath", file)
+  // Request local resources within the TIEFVISION_HOME folder (for security reasons)
+  def atResources(rootPath: String, filePath: String) = Action {
+    val file = new File(s"${Configuration.HomeFolder}/$rootPath/$filePath")
+    val fileAbsolutePath = file.getAbsolutePath()
+
+    if(fileAbsolutePath.startsWith(Configuration.HomeFolder)) {
+      Ok.sendFile(file)
+    } else {
+      Logger.error(s"Dangerous file requested: ${fileAbsolutePath} !!!")
+      NotFound
+    }
+  }
 
 }
