@@ -33,3 +33,6 @@ src/torch/models/
 src/scala/tiefvision-web/target
 src/torch/data/db
 .idea
+
+# H2 database
+*.db
