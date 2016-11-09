@@ -16,7 +16,7 @@ local similarity_db_lib = require 'similarity_db_lib'
 local search_commons = require 'search_commons'
 
 function getTestError(referenceEncoding)
-  local dataFolder = '../data/db/similarity/img-enc-cnn-encoder'
+  local dataFolder = '../data/encoded-images'
   local testLines = tiefvision_commons.getFiles(dataFolder)
   local comparisonTable = {}
   for testIndex = 1, #testLines do
