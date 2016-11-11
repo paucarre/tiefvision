@@ -4,78 +4,43 @@
 * terms of the Apache License v2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt).
 *@
 @(images: Seq[String], isSupervised: Boolean, page: Int, pageGroup: Int, pageGroups: Int)
-<html>
-<head>
-  <style>
-    div.item {
-    vertical-align: top;
-    display: inline-block;
-    text-align: center;
-    width: 350px;
-    }
-    img {
-    width: 340px;
-    background-color: grey;
-    border:1px solid #021a40;
-    }
-    .caption {
-    display: block;
-    }
-  </style>
-  <title>TiefVision</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-  <link href="/assets/css/offcanvas.css" rel="stylesheet">
-</head>
-<body>
-<nav class="navbar navbar-fixed-top navbar-inverse">
-  <div class="container">
-    <div class="navbar-header">
-      <a class="navbar-brand" href="#">TiefVision</a>
-    </div>
-    <div id="navbar" class="collapse navbar-collapse">
-      <ul class="nav navbar-nav">
-        <li><a href="/">Image Gallery</a></li>
-        <li><a href="/similarity_finder_upload_form">Search Using File</a></li>
-      </ul>
-    </div><!-- /.nav-collapse -->
-  </div><!-- /.container -->
-</nav><!-- /.navbar -->
 
-<nav class="pagination-gallery">
-  <ul class="pagination">
-    <li>
-      @if(pageGroup > 1) {
-      <a href="@routes.Application.similarityGallery(isSupervised, 1, pageGroup - 1)" aria-label="Previous">
-        <span aria-hidden="true">&laquo;</span>
-      </a>
+@layout.html {
+
+
+<div class="container-fluid">
+  <nav>
+    <ul class="pagination">
+      <li>
+        @if(pageGroup > 1) {
+        <a href="@routes.Application.similarityGallery(isSupervised, 1, pageGroup - 1)" aria-label="Previous">
+          <span aria-hidden="true">&laquo;</span>
+        </a>
+        }
+      </li>
+      @for(pageIndex <- (1 to 20)) {
+      <li><a href="@routes.Application.similarityGallery(isSupervised, pageIndex, pageGroup)">@pageIndex</a></li>
       }
-    </li>
-    @for(pageIndex <- (1 to 20)) {
-    <li><a href="@routes.Application.similarityGallery(isSupervised, pageIndex, pageGroup)">@pageIndex</a></li>
-    }
-    @if(pageGroup < pageGroups) {
-    <li>
-      <a href="@routes.Application.similarityGallery(isSupervised, 1, pageGroup + 1)" aria-label="Next">
-        <span aria-hidden="true">&raquo;</span>
-      </a>
-    </li>
-    }
-  </ul>
-</nav>
+      @if(pageGroup < pageGroups) {
+      <li>
+        <a href="@routes.Application.similarityGallery(isSupervised, 1, pageGroup + 1)" aria-label="Next">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+      </li>
+      }
+    </ul>
+  </nav>
 
-<div class="container-gallery">
-  @for(imageGroup <- images.take(20).toList.grouped(5)) {
   <div>
-    @for(image <- imageGroup) {
-    <div class="item">
-      <a href="@{routes.Application.similarityFinderFor(image, false)}">
-        <img id="@{image}" class="img-thumbnail image" src="/dresses_db/@{image}"/>
-      </a>
-      <span class="caption">@{image}</span>
-    </div>
+    @for(image <- images) {
+      <div class="pull-left">
+        <a href="@{routes.Application.similarityFinderFor(image, false)}">
+          <img id="@{image}" class="img-thumbnail" src="/dresses_db/@{image}"/>
+        </a>
+        <div class="text-center">@{image}</div>
+      </div>
     }
   </div>
-  }
 </div>
-</body>
-</html>
+
+}

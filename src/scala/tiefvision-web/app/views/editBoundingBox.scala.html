@@ -4,20 +4,19 @@
 * terms of the Apache License v2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt).
 *@
 @(image: String, boundingBoxOpt: Option[db.BoundingBox] = None)
-<html>
-  <body>
-    <div>
-      <button id="repaint_button">Repaint</button>
-      <button id="save_button">Save and move to next</button>
-    </div>
-    <p>@{image}</p>
-    <canvas id="bbox_canvas" width="1024" height="2048" style="border:1px solid #d3d3d3;">
-    </canvas>
-    </body>
-</html>
 
-<script src="assets/javascripts/jquery-2.2.0.js"></script>
-<script src="assets/javascripts/BoundingBoxEditor.js"></script>
+@layout.html {
+
+<div class="container-fluid text-center">
+  <div>
+    <button id="repaint_button">Repaint</button>
+    <button id="save_button">Save and move to next</button>
+  </div>
+  <p>@{image}</p>
+  <canvas id="bbox_canvas" width="540px" height="720px">
+  </canvas>
+</div>
+
 <script>
 window.onload = function() {
   @boundingBoxOpt.fold {
@@ -27,3 +26,5 @@ window.onload = function() {
   }
 }
 </script>
+
+}

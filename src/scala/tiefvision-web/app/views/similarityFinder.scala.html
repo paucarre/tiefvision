@@ -5,91 +5,25 @@
 *@
 @(imageSearchResult: core.ImageSearchResult, isSupervised: Boolean, masterBase: String, bboxBase: String)
 @imageSearchResultDisplay = @{imageSearchResult.distanceToSimilarImages.take(5)}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-  <meta name="description" content="">
-  <meta name="author" content="">
-  <link rel="icon" href="../../favicon.ico">
 
-  <title>TiefVision</title>
+@layout.html {
 
-  <!-- Bootstrap core CSS -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-
-  <!-- Custom styles for this template -->
-  <link href="/assets/css/offcanvas.css" rel="stylesheet">
-</head>
-
-<body>
-<nav class="navbar navbar-fixed-top navbar-inverse">
-  <div class="container">
-    <div class="navbar-header">
-      <a class="navbar-brand" href="#">TiefVision</a>
-    </div>
-    <div id="navbar" class="collapse navbar-collapse">
-      <ul class="nav navbar-nav">
-        <li><a href="/">Image Gallery</a></li>
-        <li><a href="/similarity_finder_upload_form">Search Using File</a></li>
-      </ul>
-    </div><!-- /.nav-collapse -->
-  </div><!-- /.container -->
-</nav><!-- /.navbar -->
-
-<div class="container-query">
-  <div class="item-query">
+<div class="container-fluid text-center">
+  <div>
     <h5>Image To Search</h5>
-    <img id="reference" width="310px" class="img-thumbnail" src="/@{masterBase}/@{imageSearchResult.image}"/>
+    <img id="reference" class="img-thumbnail" src="/@{masterBase}/@{imageSearchResult.image}"/>
   </div>
-  <!--
-  <div class="item-query">
-    <h5>Dress To Search</h5>
-    <img width="150px" class="img-thumbnail" src="/@{bboxBase}/@{imageSearchResult.image}"/>
-  </div>
-  -->
 </div>
-<div class="container-result">
-  <div class="item-result">
-    <h5 class="title-result">Closest Dress</h5>
-    <a href="@{routes.Application.similarityFinderFor(imageSearchResultDisplay(0)._2, isSupervised)}">
-      <img id="result-1" class="img-thumbnail img-result"
-           src="/dresses_db/@{imageSearchResultDisplay(0)._2}"/>
-    </a>
-  </div><!--/.col-xs-6.col-lg-4-->
-  <div class="item-result">
-    <h5 class="title-result">Second Closest Dress</h5>
-    <a href="@{routes.Application.similarityFinderFor(imageSearchResultDisplay(1)._2, isSupervised)}">
-      <img id="result-2" class="img-thumbnail img-result"
-           src="/dresses_db/@{imageSearchResultDisplay(1)._2}"/>
-    </a>
-  </div><!--/.col-xs-6.col-lg-4-->
-  <div class="item-result">
-    <h5 class="title-result">Third Closest Dress</h5>
-    <a href="@{routes.Application.similarityFinderFor(imageSearchResultDisplay(2)._2, isSupervised)}">
-      <img id="result-3" class="img-thumbnail img-result"
-           src="/dresses_db/@{imageSearchResultDisplay(2)._2}"/>
-    </a>
-  </div><!--/.col-xs-6.col-lg-4-->
-  <div class="item-result">
-    <h5 class="title-result">Fourth Closest Dress</h5>
-    <a href="@{routes.Application.similarityFinderFor(imageSearchResultDisplay(3)._2, isSupervised)}">
-      <img id="result-4" class="img-thumbnail img-result"
-           src="/dresses_db/@{imageSearchResultDisplay(3)._2}"/>
-    </a>
-  </div><!--/.col-xs-6.col-lg-4-->
-  <div class="item-result">
-    <h5 class="title-result">Fifth Closest Dress</h5>
-    <a href="@{routes.Application.similarityFinderFor(imageSearchResultDisplay(4)._2, isSupervised)}">
-      <img id="result-5" class="img-thumbnail img-result"
-           src="/dresses_db/@{imageSearchResultDisplay(4)._2}"/>
-    </a>
-  </div><!--/.col-xs-6.col-lg-4-->
+
+<div class="container-fluid result-container">
+  @imageSearchResultDisplay.zipWithIndex.map { case ((_, image), index) =>
+    <div class="pull-left text-center">
+      <h5>@helpers.rank(index + 1) Closest Dress</h5>
+      <a href="@{routes.Application.similarityFinderFor(image, isSupervised)}">
+        <img class="img-thumbnail" src="/dresses_db/@image"/>
+      </a>
+    </div>
+  }
 </div>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-<script src="/assets/javascripts/bootstrap.min.js"></script>
-</body>
-</html>
+
+}

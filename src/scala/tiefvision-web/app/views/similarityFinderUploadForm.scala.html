@@ -4,48 +4,19 @@
 * terms of the Apache License v2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt).
 *@
 @import helper._
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-  <meta name="description" content="">
-  <meta name="author" content="">
-  <link rel="icon" href="../../favicon.ico">
 
-  <title>TiefVision</title>
+@layout.html {
 
-  <!-- Bootstrap core CSS -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-
-  <!-- Custom styles for this template -->
-  <link href="/assets/css/offcanvas.css" rel="stylesheet">
-</head>
-<body>
-<nav class="navbar navbar-fixed-top navbar-inverse">
-  <div class="container">
-    <div class="navbar-header">
-      <a class="navbar-brand" href="#">TiefVision</a>
-    </div>
-    <div id="navbar" class="collapse navbar-collapse">
-      <ul class="nav navbar-nav">
-        <li><a href="/">Image Gallery</a></li>
-      </ul>
-    </div><!-- /.nav-collapse -->
-  </div><!-- /.container -->
-</nav><!-- /.navbar -->
-<div class="container">
+<div class="container-fluid">
   <div class="jumbotron">
     @form(action = routes.Application.upload, 'enctype -> "multipart/form-data") {
-    <div class="form-group">
-      <label for="picture">Select an image that contains a dress</label>
-      <input type="file" class="form-control" name="picture" id="picture">
-    </div>
-    <button type="submit" class="btn btn-default">Find dresses with similar style</button>
+      <div class="form-group">
+        <label for="picture">Select an image that contains a dress</label>
+        <input type="file" class="form-control" name="picture" id="picture">
+      </div>
+      <button type="submit" class="btn btn-default">Find dresses with similar style</button>
     }
   </div>
 </div>
-</body>
-</html>
 
+}
