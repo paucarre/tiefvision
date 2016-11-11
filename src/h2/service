@@ -1,0 +1,35 @@
+#/bin/bash
+
+trap 'exit 1' ERR
+
+ROOT=$(realpath $(dirname ${BASH_SOURCE[0]})/../..)
+
+DOCKER_IMAGE_NAME=paucarre/tiefvision-db
+DOCKER_SERVICE_NAME=tiefvision-db
+
+case "$1" in
+  start)
+    touch $ROOT/src/h2/tiefvision.mv.db
+
+    echo "Building image $DOCKER_IMAGE_NAME"
+    docker build -t $DOCKER_IMAGE_NAME $ROOT/src/h2
+
+    echo "Running container $DOCKER_IMAGE_NAME"
+    docker run \
+      --detach \
+      --name $DOCKER_SERVICE_NAME \
+      --publish 8082:8082 \
+      --publish 9092:9092 \
+      --volume $ROOT/src/h2/tiefvision.mv.db:/root/tiefvision.mv.db \
+      $DOCKER_IMAGE_NAME
+    ;;
+
+  stop)
+    echo "Removing container $DOCKER_IMAGE_NAME"
+    docker rm --force $DOCKER_SERVICE_NAME
+    ;;
+
+  *)
+    echo $"Usage: $0 {start|stop}"
+    exit 1
+esac
