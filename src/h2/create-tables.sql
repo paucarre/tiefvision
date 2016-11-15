@@ -1,22 +1,22 @@
--- Copyright (C) 2016 Pau Carré Cardona - All Rights Reserved
--- You may use, distribute and modify this code under the
--- terms of the Apache License v2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt).
+-- COPYRIGHT (C) 2016 PAU CARRÉ CARDONA - ALL RIGHTS RESERVED
+-- YOU MAY USE, DISTRIBUTE AND MODIFY THIS CODE UNDER THE
+-- TERMS OF THE APACHE LICENSE V2.0 (HTTP://WWW.APACHE.ORG/LICENSES/LICENSE-2.0.TXT).
 
-create table if not exists BOUNDING_BOX(
-  file_name varchar(255) primary key,
-  top int not null,
-  left int not null,
-  bottom int not null,
-  right int not null,
-  width int not null,
-  height int not null,
-  dataset varchar(255) default 'UNKNOWN'
+CREATE TABLE IF NOT EXISTS "BOUNDING_BOX"(
+  "FILE_NAME" VARCHAR(255) PRIMARY KEY,
+  "TOP" INT NOT NULL,
+  "LEFT" INT NOT NULL,
+  "BOTTOM" INT NOT NULL,
+  "RIGHT" INT NOT NULL,
+  "WIDTH" INT NOT NULL,
+  "HEIGHT" INT NOT NULL,
+  "DATASET" VARCHAR(255) DEFAULT 'UNKNOWN'
 );
 
-create table if not exists SIMILARITY(
-  reference varchar(255),
-  positive  varchar(255),
-  negative  varchar(255),
-  dataset varchar(255) default 'UNKNOWN',
-  PRIMARY KEY(reference, positive, negative)
+CREATE TABLE IF NOT EXISTS "SIMILARITY"(
+  "REFERENCE" VARCHAR(255),
+  "POSITIVE"  VARCHAR(255),
+  "NEGATIVE"  VARCHAR(255),
+  "DATASET" VARCHAR(255) DEFAULT 'UNKNOWN',
+  PRIMARY KEY("REFERENCE", "POSITIVE", "NEGATIVE")
 );
