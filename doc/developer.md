@@ -12,7 +12,7 @@ Note that there so far no will to remove this requirement. I might move it to **
 * **Linux OS** ( other Unix-like OSs *should* also work)
 * Latest version of **Torch**
 * Compatible **Java Development Kit 8** (recommended Oracle (Copyright) JDK )
-* An **H2** database server. I don't think **TiefVision** will ever support another database.
+* A database server. H2 is implemented, but postgresql can easily used instead
 
 ## Environment setup
 
@@ -28,11 +28,12 @@ git clone git@github.com:paucarre/tiefvision.git
 export TIEFVISION_HOME=<PATH_TO_TIEFVISION_REPOSITORY>
 ```
 
-## H2 Database setup
+## Database setup
 
-**TiefVision** uses an **H2** database to store data regarding bounding boxes in images and also similarities between images.
-**TiefVision** expects a **H2** server deployed in the configuration parameter **slick.dbs.bounding_box.db.url** from **$TIEFVISION_HOME/src/scala/tiefvision-web/conf/application.conf**.
-The **H2** database must have the necessary tables created. The DDL SQL query that generates those tables can be found in **$TIEFVISION_HOME/src/scala/tiefvision-web/conf/ddl.sql**.
+**TiefVision** uses a database to store data regarding bounding boxes in images and also similarities between images.
+**TiefVision** has an easy to run **H2** docker image that can be built and run via **$TIEFVISION_HOME/src/h2/service**.
+**TiefVision**'s can be configured to use another database, like postgresql.
+Just change **slick.dbs.bounding_box.* ** from **$TIEFVISION_HOME/src/scala/tiefvision-web/conf/application.conf**.
 
 ## Transfer Learning
 
@@ -55,7 +56,7 @@ First off, you'll have to first download a set of images and place them in
 Keep in mind that the file name will identify the image and therefore it's wise
 to name the image using some sort of database identifier so you can later on keep track of the image and the product it's related to.
 
-The next step is to create bounding boxes for those images. That's a pretty annoying task but at least with **TiefVision** you have a very basic web bounding box editor that'll make your life easier. To do that you'll have to start both the web server and also the **H2** database server.
+The next step is to create bounding boxes for those images. That's a pretty annoying task but at least with **TiefVision** you have a very basic web bounding box editor that'll make your life easier. To do that you'll have to start both the web server and also the database server.
 
 To start the web server do the following:
 ```
@@ -63,9 +64,9 @@ cd $TIEFVISION_HOME/src/scala/tiefvision-web
 activator run
 ```
 
-To start the H2 database sever do the following:
+To start the default database sever do the following:
 ```
-java -cp <PATH_TO_H2_JAR> org.h2.tools.Server
+$TIEFVISION_HOME/src/h2/service start
 ```
 
 Once you are done open a web browser and open the [bounding box endpoint](http://localhost:9000/bounding_box).
@@ -194,5 +195,3 @@ Once the database is generated, the images in master can be searched using that 
 cd $TIEFVISION_HOME/src/torch/15-deeprank-searcher-db
 luajit search.lua -image <IMAGE_NAME_OF_AN_IMAGE_IN_$TIEFVISION_HOME/resources/dresses-db/master>
 ```
-
-
