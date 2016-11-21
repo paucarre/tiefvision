@@ -37,14 +37,9 @@ function getOptions()
   cmd:text('Both the filename to search and the result filenames come from the folder $TIEFVISION_HOME/resources/dresses-db/master.')
   cmd:text()
   cmd:text('Options:')
-  cmd:option('-image', 'Filename (not full path, just the filename) from $TIEFVISION_HOME/resources/dresses-db/master.')
+  cmd:argument('image', 'Filename (not full path, just the filename) from $TIEFVISION_HOME/resources/dresses-db/master.', 'string')
   cmd:text()
-  local options = cmd:parse(arg)
-  if(options.image == nil) then
-    cmd:help()
-    os.exit()
-  end
-  return options
+  return cmd:parse(arg)
 end
 
 local options = getOptions()

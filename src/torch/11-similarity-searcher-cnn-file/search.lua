@@ -59,15 +59,10 @@ function getOptions()
   cmd:text('The result filenames come from the folder $TIEFVISION_HOME/resources/dresses-db/master.')
   cmd:text()
   cmd:text('Options:')
-  cmd:option('-image', 'Filename of the query image to search.')
-  cmd:option('-imagesFolder', 'Folder where the images are contained.')
+  cmd:argument('image', 'Filename of the query image to search.', 'string')
+  cmd:argument('imagesFolder', 'Folder where the images are contained.', 'string')
   cmd:text()
-  local options = cmd:parse(arg)
-  if(options.image == nil or options.imagesFolder == nil) then
-    cmd:help()
-    os.exit()
-  end
-  return options
+  return cmd:parse(arg)
 end
 
 local options = getOptions()

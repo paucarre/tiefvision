@@ -24,8 +24,8 @@ object ImageProcessing {
   def randomSmilarityImage = SimilarityImages(random.nextInt(SimilarityImages.length))
 
   def findSimilarImages(image: String, finderFolder: String, imagesFolderOpt: Option[String] = None): ImageSearchResult = {
-    val imagesFolderOptionOpt = imagesFolderOpt.map(imagesFolder => s"-imagesFolder ${imagesFolder}").getOrElse("")
-    val finderProcessBuilder = Process(Seq("bash", "-c", s"luajit search.lua $imagesFolderOptionOpt -image $image"), new File(finderFolder))
+    val luaSearch = s"luajit search.lua $image ${imagesFolderOpt.getOrElse("")}"
+    val finderProcessBuilder = Process(Seq("bash", "-c", luaSearch), new File(finderFolder))
     val finderProcessOutput: String = finderProcessBuilder.!!
     val data = {
       def reduce(lines: Seq[(String, Double)], line: String): Seq[(String, Double)] = {

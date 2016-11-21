@@ -154,7 +154,7 @@ luajit similarity-db.lua
 Once the database is generated, the images in master can be searched using that database using:
 ```
 cd $TIEFVISION_HOME/src/torch/10-similarity-searcher-cnn-db
-luajit search.lua -image <IMAGE_NAME_OF_AN_IMAGE_IN_$TIEFVISION_HOME/resources/dresses-db/master>
+luajit search.lua <IMAGE_NAME_OF_AN_IMAGE_IN_$TIEFVISION_HOME/resources/dresses-db/master>
 ```
 
 # Supervised Image Similarity (Deep Rank)
@@ -193,5 +193,5 @@ luajit deeprank-db.lua
 Once the database is generated, the images in master can be searched using that database using:
 ```
 cd $TIEFVISION_HOME/src/torch/15-deeprank-searcher-db
-luajit search.lua -image <IMAGE_NAME_OF_AN_IMAGE_IN_$TIEFVISION_HOME/resources/dresses-db/master>
+luajit search.lua <IMAGE_NAME_OF_AN_IMAGE_IN_$TIEFVISION_HOME/resources/dresses-db/master>
 ```
