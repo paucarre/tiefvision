@@ -2,7 +2,11 @@
 -- You may use, distribute and modify this code under the
 -- terms of the Apache License v2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt).
 
-package.path = package.path .. ';../0-tiefvision-commons/?.lua;../6-bboxlib/?.lua'
+local libsFolder = require('paths').thisfile('..')
+package.path = package.path .. ';' ..
+  libsFolder .. '/0-tiefvision-commons/?.lua;' ..
+  libsFolder .. '/6-bboxlib/?.lua'
+
 require 'inn'
 require 'optim'
 require 'torch'
@@ -22,9 +26,9 @@ function getFiles(folder)
   return files
 end
 
-local folder = "../../../resources/dresses-db/master"
-local bboxesFolder = "../../../resources/dresses-db/bboxes"
-local flippedBboxesFolder = "../../../resources/dresses-db/bboxes-flipped"
+local folder = tiefvision_commons.resourcePath('dresses-db/master')
+local bboxesFolder = tiefvision_commons.resourcePath('dresses-db/bboxes')
+local flippedBboxesFolder = tiefvision_commons.resourcePath('dresses-db/bboxes-flipped')
 local files = getFiles(folder)
 for fileIndex = 1, #files do
   if not tiefvision_commons.fileExists(bboxesFolder .. '/1/' .. files[fileIndex]) then

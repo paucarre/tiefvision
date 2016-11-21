@@ -2,17 +2,22 @@
 -- You may use, distribute and modify this code under the
 -- terms of the Apache License v2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt).
 
-package.path = package.path .. ';./?.lua'
+local libsFolder = require('paths').thisfile('..')
+package.path = package.path .. ';' ..
+  libsFolder .. '/0-tiefvision-commons/?.lua;' ..
+  libsFolder .. '/3-train-regression-bounding-box/?.lua'
+
 require 'inn'
 require 'optim'
 require 'torch'
 require 'xlua'
+tiefvision_commons = require 'tiefvision_commons'
 
 function getTestError(model, index)
-  local testIn = torch.load("../data/bbox-test-in/1.data")
-  local testOut = torch.load("../data/bbox-test-out/1.data")
-  local mean = torch.load("../models/bbox-train-mean")
-  local std = torch.load("../models/bbox-train-std")
+  local testIn = torch.load(tiefvision_commons.dataPath('bbox-test-in/1.data'))
+  local testOut = torch.load(tiefvision_commons.dataPath('bbox-test-out/1.data'))
+  local mean = torch.load(tiefvision_commons.modelPath('bbox-train-mean'))
+  local std = torch.load(tiefvision_commons.modelPath('bbox-train-std'))
   local errRandVec = 0.0
   local countRand = 0
   local errVec = 0.0
@@ -32,7 +37,7 @@ function getTestError(model, index)
 end
 
 function loadSavedModelConv(index)
-  return torch.load('../models/locatorconv-' .. index .. '.model')
+  return torch.load(tiefvision_commons.modelPath('locatorconv-' .. index .. '.model'))
 end
 
 for index = 1, 4 do

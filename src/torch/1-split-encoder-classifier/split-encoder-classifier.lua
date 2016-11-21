@@ -8,7 +8,9 @@
 -- to encode images.
 --
 
-package.path = package.path .. ';../0-tiefvision-commons/?.lua'
+local libsFolder = require('paths').thisfile('..')
+package.path = package.path .. ';' .. libsFolder .. '/0-tiefvision-commons/?.lua'
+
 require 'loadcaffe'
 require 'image'
 require 'inn'
@@ -82,8 +84,8 @@ assert(outputEnc[2]:size()[3] == (outputEnc[1]:size()[3] * 2) - 1, 'the regressi
 
 print("Saving models...")
 
-torch.save('../models/net.model', net)
-torch.save('../models/encoder.model', encoder)
-torch.save('../models/classifier-original.model', classifier)
+torch.save(tiefvision_commons.modelPath('net.model'), net)
+torch.save(tiefvision_commons.modelPath('encoder.model'), encoder)
+torch.save(tiefvision_commons.modelPath('classifier-original.model'), classifier)
 
 print("Finished!")

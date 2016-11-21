@@ -2,7 +2,9 @@
 -- You may use, distribute and modify this code under the
 -- terms of the Apache License v2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt).
 
-package.path = package.path .. ';../0-tiefvision-commons/?.lua'
+local libsFolder = require('paths').thisfile('..')
+package.path = package.path .. ';' .. libsFolder .. '/0-tiefvision-commons/?.lua'
+
 require 'inn'
 require 'optim'
 require 'torch'
@@ -12,8 +14,8 @@ local tiefvision_commons = require 'tiefvision_commons'
 local search_commons = require 'search_commons'
 
 function getTestError(reference)
-  local dataFolder = '../data/encoded-images'
-  local similarityDb = '../data/img-unsup-similarity-db'
+  local dataFolder = tiefvision_commons.dataPath('encoded-images')
+  local similarityDb = tiefvision_commons.dataPath('img-unsup-similarity-db')
   local testLines = tiefvision_commons.getFiles(dataFolder)
   local similarities = torch.load(similarityDb):double()
   local referenceIndex = search_commons.getIndex(testLines, reference)

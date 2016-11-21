@@ -2,7 +2,12 @@
 -- You may use, distribute and modify this code under the
 -- terms of the Apache License v2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt).
 
-package.path = package.path .. ';../0-tiefvision-commons/?.lua;../5-train-classification/?.lua;./?.lua'
+local libsFolder = require('paths').thisfile('..')
+package.path = package.path .. ';' ..
+  libsFolder .. '/0-tiefvision-commons/?.lua;' ..
+  libsFolder .. '/5-train-classification/?.lua;' ..
+  libsFolder .. '/8-similarity-db-cnn/?.lua'
+
 require 'inn'
 require 'optim'
 require 'torch'
@@ -27,5 +32,5 @@ function createDb(sourceFolder, destinationFolder)
   end
 end
 
-createDb("../../../resources/dresses-db/bboxes/1", "../data/encoded-images")
-createDb("../../../resources/dresses-db/bboxes-flipped/1", "../data/encoded-images-flipped")
+createDb(tiefvision_commons.resourcePath('dresses-db/bboxes/1'), tiefvision_commons.dataPath('encoded-images'))
+createDb(tiefvision_commons.resourcePath('dresses-db/bboxes-flipped/1'), tiefvision_commons.dataPath('encoded-images-flipped'))

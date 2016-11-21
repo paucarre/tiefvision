@@ -2,7 +2,11 @@
 -- You may use, distribute and modify this code under the
 -- terms of the Apache License v2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt).
 
-package.path = package.path .. ';../0-tiefvision-commons/?.lua;./?.lua'
+local libsFolder = require('paths').thisfile('..')
+package.path = package.path .. ';' ..
+  libsFolder .. '/0-tiefvision-commons/?.lua;' ..
+  libsFolder .. '/14-deeprank-db/?.lua'
+
 require 'inn'
 require 'optim'
 require 'torch'
@@ -26,7 +30,7 @@ function getInitialRefIndex(similarities)
 end
 
 function similarityDb()
-  local dataFolder = '../data/db/similarity/img-similarity-deeprank'
+  local dataFolder = tiefvision_commons.dataPath('db/similarity/img-similarity-deeprank')
   local testLines = tiefvision_commons.getFiles(dataFolder)
   local similarities = torch.ones(#testLines, #testLines) * -1.0
   -- local similarities = torch.load('../data/db/similarity/img-sup-similarity-db')
@@ -47,13 +51,13 @@ function similarityDb()
       end
     end
     -- compare itself with its mirror
-    local flippedEncoding = torch.load('../data/db/similarity/img-flipped-similarity-deeprank/' .. reference):double()
+    local flippedEncoding = torch.load(tiefvision_commons.dataPath('db/similarity/img-flipped-similarity-deeprank', reference)):double()
     local similarity = similarity_lib.similarity(referenceEncoding, flippedEncoding)
     if (similarity) then
       similarities[referenceIndex][referenceIndex] = similarity
       -- print('DIST( ' .. reference .. ', ' .. reference .. ' ) = ' .. similarity)
     end
-    torch.save('../data/db/similarity/img-sup-similarity-db', similarities)
+    torch.save(tiefvision_commons.dataPath('db/similarity/img-sup-similarity-db'), similarities)
     if referenceIndex % 10 == 0 then
       collectgarbage()
     end

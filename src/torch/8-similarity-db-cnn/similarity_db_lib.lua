@@ -2,7 +2,9 @@
 -- You may use, distribute and modify this code under the
 -- terms of the Apache License v2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt).
 
-package.path = package.path .. ';../0-tiefvision-commons/?.lua'
+local libsFolder = require('paths').thisfile('..')
+package.path = package.path .. ';' .. libsFolder .. '/0-tiefvision-commons/?.lua'
+
 require 'inn'
 require 'torch'
 require 'image'
@@ -11,7 +13,7 @@ local tiefvision_commons = require 'tiefvision_commons'
 local similarity_db_lib = {}
 
 function similarity_db_lib.getEncoder()
-  return torch.load('../models/encoder.model')
+  return torch.load(tiefvision_commons.modelPath('encoder.model'))
 end
 
 function similarity_db_lib.encodeImage(imagePath, encoder)
