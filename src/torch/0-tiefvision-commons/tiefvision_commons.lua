@@ -86,8 +86,14 @@ function tiefvision_commons.preprocess(im)
 end
 
 function tiefvision_commons.path(...)
+  local environmentVariableName = 'TIEFVISION_HOME'
+  local root = os.getenv(environmentVariableName)
+  if not root then
+    error(string.format("missing environment variable: %s", environmentVariableName))
+  end
+
   local file_path_table = {...}
-  table.insert(file_path_table, 1, os.getenv('TIEFVISION_HOME'))
+  table.insert(file_path_table, 1, root)
   local file_path, _ = table.concat(file_path_table, '/'):gsub('/+', '/')
   return file_path
 end
