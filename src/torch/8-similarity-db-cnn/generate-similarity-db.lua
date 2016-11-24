@@ -2,11 +2,8 @@
 -- You may use, distribute and modify this code under the
 -- terms of the Apache License v2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt).
 
-local libsFolder = require('paths').thisfile('..')
-package.path = package.path .. ';' ..
-  libsFolder .. '/0-tiefvision-commons/?.lua;' ..
-  libsFolder .. '/5-train-classification/?.lua;' ..
-  libsFolder .. '/8-similarity-db-cnn/?.lua'
+local torchFolder = require('paths').thisfile('..')
+package.path = string.format("%s;%s/?.lua", os.getenv("LUA_PATH"), torchFolder)
 
 require 'inn'
 require 'optim'
@@ -14,8 +11,9 @@ require 'torch'
 require 'xlua'
 require 'lfs'
 require 'image'
-local tiefvision_commons = require 'tiefvision_commons'
-local similarity_db_lib = require 'similarity_db_lib'
+
+local tiefvision_commons = require '0-tiefvision-commons/tiefvision_commons'
+local similarity_db_lib = require '8-similarity-db-cnn/similarity_db_lib'
 
 function createDb(sourceFolder, destinationFolder)
   local files = tiefvision_commons.getFiles(sourceFolder)

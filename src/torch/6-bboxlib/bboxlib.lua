@@ -2,8 +2,8 @@
 -- You may use, distribute and modify this code under the
 -- terms of the Apache License v2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt).
 
-local libsFolder = require('paths').thisfile('..')
-package.path = package.path .. ';' .. libsFolder .. '/0-tiefvision-commons/?.lua'
+local torchFolder = require('paths').thisfile('..')
+package.path = string.format("%s;%s/?.lua", os.getenv("LUA_PATH"), torchFolder)
 
 require 'inn'
 require 'optim'
@@ -11,7 +11,8 @@ require 'torch'
 require 'xlua'
 require 'lfs'
 require 'image'
-tiefvision_commons = require 'tiefvision_commons'
+
+local tiefvision_commons = require '0-tiefvision-commons/tiefvision_commons'
 
 local bboxlib = {}
 

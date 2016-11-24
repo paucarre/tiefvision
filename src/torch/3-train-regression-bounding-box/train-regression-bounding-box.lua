@@ -2,10 +2,8 @@
 -- You may use, distribute and modify this code under the
 -- terms of the Apache License v2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt).
 
-local libsFolder = require('paths').thisfile('..')
-package.path = package.path .. ';' ..
-  libsFolder .. '/0-tiefvision-commons/?.lua;' ..
-  libsFolder .. '/3-train-regression-bounding-box/?.lua'
+local torchFolder = require('paths').thisfile('..')
+package.path = string.format("%s;%s/?.lua", os.getenv("LUA_PATH"), torchFolder)
 
 require 'inn'
 require 'optim'
@@ -13,13 +11,13 @@ require 'torch'
 require 'xlua'
 require 'lfs'
 
-local locatorconv = require 'locatorconv'
+local locatorconv = require '3-train-regression-bounding-box/locatorconv'
 
 local batchSize = 32
 
 local inputsBatch = torch.Tensor(batchSize, 384, 11, 11):cuda()
 local outputsBatch = torch.Tensor(batchSize, 1):cuda()
-local tiefvision_commons = require 'tiefvision_commons'
+local tiefvision_commons = require '0-tiefvision-commons/tiefvision_commons'
 
 function train(trainIn, trainOut, model, criterion, index, optimState)
   local trainIndex = 1

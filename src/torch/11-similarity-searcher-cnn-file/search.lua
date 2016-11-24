@@ -2,13 +2,8 @@
 -- You may use, distribute and modify this code under the
 -- terms of the Apache License v2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt).
 
-local libsFolder = require('paths').thisfile('..')
-package.path = package.path .. ';' ..
-  libsFolder .. '/0-tiefvision-commons/?.lua;' ..
-  libsFolder .. '/6-bboxlib/?.lua;' ..
-  libsFolder .. '/8-similarity-db-cnn/?.lua;' ..
-  libsFolder .. '/9-similarity-db/?.lua;' ..
-  libsFolder .. '/10-similarity-searcher-cnn-db/?.lua'
+local torchFolder = require('paths').thisfile('..')
+package.path = string.format("%s;%s/?.lua", os.getenv("LUA_PATH"), torchFolder)
 
 require 'inn'
 require 'optim'
@@ -16,11 +11,11 @@ require 'torch'
 require 'xlua'
 require 'lfs'
 
-local tiefvision_commons = require 'tiefvision_commons'
-local bboxlib = require 'bboxlib'
-local similarity_lib = require 'similarity_lib'
-local similarity_db_lib = require 'similarity_db_lib'
-local search_commons = require 'search_commons'
+local tiefvision_commons = require '0-tiefvision-commons/tiefvision_commons'
+local bboxlib = require '6-bboxlib/bboxlib'
+local similarity_db_lib = require '8-similarity-db-cnn/similarity_db_lib'
+local similarity_lib = require '9-similarity-db/similarity_lib'
+local search_commons = require '10-similarity-searcher-cnn-db/search_commons'
 
 function getTestError(referenceEncoding)
   local dataFolder = tiefvision_commons.dataPath('encoded-images')

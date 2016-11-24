@@ -5,14 +5,15 @@
 -- Uses the image encoder to encode the train and test
 -- data sets for the bounding box regression
 
-local libsFolder = require('paths').thisfile('..')
-package.path = package.path .. ';' .. libsFolder .. '/0-tiefvision-commons/?.lua'
+local torchFolder = require('paths').thisfile('..')
+package.path = string.format("%s;%s/?.lua", os.getenv("LUA_PATH"), torchFolder)
 
 require 'nn'
 require 'inn'
 require 'image'
 require 'lfs'
-tiefvision_commons = require 'tiefvision_commons'
+
+local tiefvision_commons = require '0-tiefvision-commons/tiefvision_commons'
 
 function loadData(encoder, filename)
   local outputsBatch = {}
