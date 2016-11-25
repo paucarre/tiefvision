@@ -13,6 +13,7 @@ require 'lfs'
 
 local tiefvision_commons = require '0-tiefvision-commons/tiefvision_commons'
 local similarity_lib = require '14-deeprank-db/similarity_lib'
+local database = require('0-tiefvision-commons/tiefvision_config_loader').load().database
 
 function getInitialRefIndex(similarities)
   local initIndex = 1
@@ -32,7 +33,7 @@ function similarityDb()
   local dataFolder = tiefvision_commons.dataPath('db/similarity/img-similarity-deeprank')
   local testLines = tiefvision_commons.getFiles(dataFolder)
   local similarities = torch.ones(#testLines, #testLines) * -1.0
-  -- local similarities = torch.load('../data/db/similarity/img-sup-similarity-db')
+  -- local similarities = database.read('img-sup-similarity-db')
   local initialReferenceIndex = getInitialRefIndex(similarities)
   print('Initial Reference Index: ' .. initialReferenceIndex)
   for referenceIndex = initialReferenceIndex, #testLines do
@@ -56,7 +57,7 @@ function similarityDb()
       similarities[referenceIndex][referenceIndex] = similarity
       -- print('DIST( ' .. reference .. ', ' .. reference .. ' ) = ' .. similarity)
     end
-    torch.save(tiefvision_commons.dataPath('db/similarity/img-sup-similarity-db'), similarities)
+    database.write('img-sup-similarity-db', similarities)
     if referenceIndex % 10 == 0 then
       collectgarbage()
     end

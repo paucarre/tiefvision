@@ -12,13 +12,15 @@ require 'xlua'
 require 'lfs'
 
 local tiefvision_commons = require '0-tiefvision-commons/tiefvision_commons'
+local tiefvision_config_loader = require '0-tiefvision-commons/tiefvision_config_loader'
 local search_commons = require '10-similarity-searcher-cnn-db/search_commons'
+local database = tiefvision_config_loader.load().database
 
 function getTestError(reference)
-  local similarityDb = tiefvision_commons.dataPath('db/similarity/img-sup-similarity-db')
+  local similarityDb = 'img-sup-similarity-db'
   local dataFolder = tiefvision_commons.dataPath('db/similarity/img-similarity-deeprank')
   local testLines = tiefvision_commons.getFiles(dataFolder)
-  local similarities = torch.load(similarityDb):double()
+  local similarities = database.read(similarityDb):double()
   local referenceIndex = search_commons.getIndex(testLines, reference)
   local comparisonTable = {}
   for testIndex = 1, #testLines do
@@ -38,6 +40,8 @@ function getOptions()
   cmd:text('Both the filename to search and the result filenames come from the folder $TIEFVISION_HOME/resources/dresses-db/master.')
   cmd:text()
   cmd:argument('image', 'Filename (not full path, just the filename) from $TIEFVISION_HOME/resources/dresses-db/master.', 'string')
+  cmd:text()
+  cmd:option('-config', tiefvision_config_loader.default, 'Configuration file to use.')
   cmd:text()
   return cmd:parse(arg)
 end

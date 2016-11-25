@@ -12,6 +12,7 @@ require 'xlua'
 require 'lfs'
 
 local tiefvision_commons = require '0-tiefvision-commons/tiefvision_commons'
+local tiefvision_config_loader = require '0-tiefvision-commons/tiefvision_config_loader'
 local bboxlib = require '6-bboxlib/bboxlib'
 local similarity_db_lib = require '8-similarity-db-cnn/similarity_db_lib'
 local similarity_lib = require '9-similarity-db/similarity_lib'
@@ -56,6 +57,8 @@ function getOptions()
   cmd:text('Options:')
   cmd:argument('image', 'Filename of the query image to search.', 'string')
   cmd:argument('imagesFolder', 'Folder where the images are contained.', 'string')
+  cmd:text()
+  cmd:option('-config', tiefvision_config_loader.default, 'Configuration file to use.')
   cmd:text()
   return cmd:parse(arg)
 end

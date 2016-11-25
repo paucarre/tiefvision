@@ -13,6 +13,7 @@ require 'lfs'
 
 local tiefvision_commons = require '0-tiefvision-commons/tiefvision_commons'
 local similarity_lib = require '9-similarity-db/similarity_lib'
+local database = require('0-tiefvision-commons/tiefvision_config_loader').load().database
 
 function getInitialRefIndex(similarities)
   for refIndex = 1, similarities:size()[1] do
@@ -30,11 +31,9 @@ end
 function similarityDb()
   local dataFolder = tiefvision_commons.dataPath('encoded-images')
   local testLines = tiefvision_commons.getFiles(dataFolder)
-  local similaritiesDbPath = tiefvision_commons.dataPath('img-unsup-similarity-db')
-  local similarities = torch.ones(#testLines, #testLines) * -1
-  if(tiefvision_commons.fileExists(similaritiesDbPath)) then
-    similarities = torch.load(similaritiesDbPath)
-  end
+  local similaritiesDb = 'img-unsup-similarity-db'
+  local similarities = database.read(similaritiesDb) or torch.ones(#testLines, #testLines) * -1
+
   local initialReferenceIndex = getInitialRefIndex(similarities)
   print('Initial Reference Index: ' .. initialReferenceIndex)
   for referenceIndex = initialReferenceIndex, #testLines do
@@ -58,7 +57,7 @@ function similarityDb()
       similarities[referenceIndex][referenceIndex] = similarity
       -- print('DIST( ' .. reference .. ', ' .. reference .. ' ) = ' .. similarity)
     end
-    torch.save(similaritiesDbPath, similarities)
+    database.write(similaritiesDb, similarities)
     if referenceIndex % 5 == 0 then
       collectgarbage()
     end
