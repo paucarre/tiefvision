@@ -10,5 +10,5 @@ local torchFolder = require('paths').thisfile('.')
 package.path = string.format("%s;%s/?.lua", os.getenv("LUA_PATH"), torchFolder)
 
 return {
-  database = require("0-tiefvision-commons/tiefvision_torch_io")
+  database = require("0-tiefvision-commons/io/tiefvision_torch_io")
 }

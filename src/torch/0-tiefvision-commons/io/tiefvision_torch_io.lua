@@ -25,12 +25,24 @@ function tiefvision_torch_io.read(fileName)
     return nil
   end
 
-  return torch.load(file)
+  return torch.load(file):double()
 end
 
 function tiefvision_torch_io.write(fileName, data)
   local file = filePath(fileName)
+
+  paths.mkdir(paths.dirname(file))
   torch.save(file, data)
+end
+
+function tiefvision_torch_io.last(folder)
+  local files = {}
+  for file in paths.files(filePath(folder)) do
+    files[#files + 1] = file
+  end
+
+  table.sort(files)
+  return (files[#files] or 0) + 1
 end
 
 return tiefvision_torch_io

@@ -17,17 +17,20 @@ local search_commons = require '10-similarity-searcher-cnn-db/search_commons'
 local database = tiefvision_config_loader.load().database
 
 function getTestError(reference)
-  local similarityDb = 'img-sup-similarity-db'
   local dataFolder = tiefvision_commons.dataPath('db/similarity/img-similarity-deeprank')
   local testLines = tiefvision_commons.getFiles(dataFolder)
-  local similarities = database.read(similarityDb):double()
   local referenceIndex = search_commons.getIndex(testLines, reference)
+
+  local similarityDb = 'image-supervised-similarity-database'
+  local similarities = database.read(similarityDb .. '/' .. referenceIndex)
+
   local comparisonTable = {}
   for testIndex = 1, #testLines do
     local file = testLines[testIndex]
-    local sim = similarities[referenceIndex][testIndex]
+    local sim = similarities[testIndex]
     table.insert(comparisonTable, { file, sim })
   end
+
   table.sort(comparisonTable, search_commons.sortCmpTable)
   search_commons.printCmpTable(comparisonTable)
 end

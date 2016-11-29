@@ -18,16 +18,19 @@ local database = tiefvision_config_loader.load().database
 
 function getTestError(reference)
   local dataFolder = tiefvision_commons.dataPath('encoded-images')
-  local similarityDb = 'img-unsup-similarity-db'
   local testLines = tiefvision_commons.getFiles(dataFolder)
-  local similarities = database.read(similarityDb):double()
   local referenceIndex = search_commons.getIndex(testLines, reference)
+
+  local similarityDb = 'image-unsupervised-similarity-database'
+  local similarities = database.read(similarityDb .. '/' .. referenceIndex)
+
   local comparisonTable = {}
   for testIndex = 1, #testLines do
     local file = testLines[testIndex]
-    local sim = similarities[referenceIndex][testIndex]
+    local sim = similarities[testIndex]
     table.insert(comparisonTable, { file, sim })
   end
+
   table.sort(comparisonTable, search_commons.sortCmpTable)
   search_commons.printCmpTable(comparisonTable)
 end
