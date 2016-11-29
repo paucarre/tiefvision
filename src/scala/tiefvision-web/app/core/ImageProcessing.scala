@@ -23,8 +23,15 @@ object ImageProcessing {
 
   def randomSmilarityImage = SimilarityImages(random.nextInt(SimilarityImages.length))
 
+  lazy val luaConfigFlag: String = {
+    Option(sys.props("luaConfig")) match {
+      case Some(path) => s"-config $path"
+      case _ => ""
+    }
+  }
+
   def findSimilarImages(image: String, finderFolder: String, imagesFolderOpt: Option[String] = None): ImageSearchResult = {
-    val luaSearch = s"luajit search.lua $image ${imagesFolderOpt.getOrElse("")}"
+    val luaSearch = s"luajit search.lua $image ${imagesFolderOpt.getOrElse("")} $luaConfigFlag"
     val finderProcessBuilder = Process(Seq("bash", "-c", luaSearch), new File(finderFolder))
     val finderProcessOutput: String = finderProcessBuilder.!!
     val data = {
