@@ -15,34 +15,29 @@ local torch = require 'torch'
 local tiefvision_commons = require '0-tiefvision-commons/tiefvision_commons'
 local tiefvision_torch_io = {}
 
-function filePath(fileName)
-  return tiefvision_commons.dataPath(fileName)
-end
-
-function tiefvision_torch_io.read(fileName)
-  local file = filePath(fileName)
+function tiefvision_torch_io.read(database, key)
+  local file = tiefvision_commons.dataPath(database, key)
   if not paths.filep(file) then
     return nil
   end
 
-  return torch.load(file):double()
+  return torch.load(file)
 end
 
-function tiefvision_torch_io.write(fileName, data)
-  local file = filePath(fileName)
+function tiefvision_torch_io.write(database, key, value)
+  local file = tiefvision_commons.dataPath(database, key)
 
   paths.mkdir(paths.dirname(file))
-  torch.save(file, data)
+  torch.save(file, value)
 end
 
-function tiefvision_torch_io.last(folder)
+function tiefvision_torch_io.keys(database)
   local files = {}
-  for file in paths.files(filePath(folder)) do
+  for file in paths.files(tiefvision_commons.dataPath(database)) do
     files[#files + 1] = file
   end
 
-  table.sort(files)
-  return (files[#files] or 0) + 1
+  return files
 end
 
 return tiefvision_torch_io

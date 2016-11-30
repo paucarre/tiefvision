@@ -15,46 +15,44 @@ local redis = require 'redis'
 local redisClient = nil
 
 local tiefvision_redis_io = {}
-function tiefvision_redis_io.read(fileName)
-  local key = toKey(fileName)
-  local response = tiefvision_redis_io.redisClient:hgetall(key)
-
-  local responseInt = {}
-  for key, value in pairs(response) do
-    local keyInt = tonumber(key)
-    responseInt[keyInt] = value
+function tiefvision_redis_io.read(database, key)
+  local response = tiefvision_redis_io.redisClient:hgetall(database .. ':' .. key)
+  local responseWithNewKeys = {}
+  for k, v in pairs(response) do
+    local newKey = removeDatabaseFromKey(k, database)
+    responseWithNewKeys[newKey] = v
   end
 
-  return responseInt
+  return responseWithNewKeys
 end
 
-function tiefvision_redis_io.write(fileName, data)
-  local key = toKey(fileName)
-
+function tiefvision_redis_io.write(database, key, value)
   local tmpFileName = paths.tmpname()
   local file = io.open(tmpFileName, "w")
 
-  file:write(toRedisProtocol("DEL", key))
-  for i = 1, data:size()[1] do
-    file:write(toRedisProtocol("HSET", key, i, data[i]))
+  file:write(toRedisProtocol("DEL", database .. ':' .. key))
+  for k, v in pairs(value) do
+    file:write(toRedisProtocol("HSET", database .. ':' .. key, k, v))
   end
 
   file:close()
   os.execute("cat " .. tmpFileName .. " | redis-cli --pipe -h " .. tiefvision_redis_io.host .. " -p " .. tiefvision_redis_io.port .. " 1>/dev/null &")
 end
 
-function tiefvision_redis_io.last(fileName, data)
-  local keys = tiefvision_redis_io.redisClient:keys("*")
-  local keysInt = {}
+function tiefvision_redis_io.keys(database)
+  local keys = tiefvision_redis_io.redisClient:keys(database .. ":*")
   for i = 1, #keys do
-    keysInt[i] = tonumber(keys[i])
+    keys[i] = removeDatabaseFromKey(keys[i], database)
   end
 
-  return (keysInt[#keysInt] or 0) + 1
+  return keys
 end
 
-function toKey(fileName)
-  return string.gsub(fileName, ".*/", "")
+function removeDatabaseFromKey(key, database)
+  -- redis key format is "database:filename"
+  -- to remove database, sub requires database length + 1
+  -- to remove the column, sub requires + 1
+  return string.sub(key, #database + 2)
 end
 
 function toRedisProtocol(...)

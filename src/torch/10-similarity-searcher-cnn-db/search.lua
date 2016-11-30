@@ -11,23 +11,16 @@ require 'torch'
 require 'xlua'
 require 'lfs'
 
-local tiefvision_commons = require '0-tiefvision-commons/tiefvision_commons'
 local tiefvision_config_loader = require '0-tiefvision-commons/tiefvision_config_loader'
 local search_commons = require '10-similarity-searcher-cnn-db/search_commons'
 local database = tiefvision_config_loader.load().database
 
 function getTestError(reference)
-  local dataFolder = tiefvision_commons.dataPath('encoded-images')
-  local testLines = tiefvision_commons.getFiles(dataFolder)
-  local referenceIndex = search_commons.getIndex(testLines, reference)
-
   local similarityDb = 'image-unsupervised-similarity-database'
-  local similarities = database.read(similarityDb .. '/' .. referenceIndex)
+  local similarities = database.read(similarityDb, reference)
 
   local comparisonTable = {}
-  for testIndex = 1, #testLines do
-    local file = testLines[testIndex]
-    local sim = similarities[testIndex]
+  for file, sim in pairs(similarities) do
     table.insert(comparisonTable, { file, sim })
   end
 

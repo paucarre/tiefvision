@@ -85,6 +85,22 @@ function tiefvision_commons.preprocess(im)
   return imageMinusAvg:cuda()
 end
 
+function tiefvision_commons.tableSubtraction(t1, t2)
+  t1 = t1 or {}
+  t2 = t2 or {}
+
+  local t = {}
+  for i = 1, #t2 do t[t2[i]] = true end
+
+  for i = #t1, 1, -1 do
+    if t[t1[i]] then
+      table.remove(t1, i)
+    end
+  end
+
+  return t1
+end
+
 function tiefvision_commons.path(...)
   local environmentVariableName = 'TIEFVISION_HOME'
   local root = os.getenv(environmentVariableName)

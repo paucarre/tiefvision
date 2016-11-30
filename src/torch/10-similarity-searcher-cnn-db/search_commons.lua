@@ -4,15 +4,6 @@
 
 local search_commons = {}
 
-function search_commons.getIndex(testLines, reference)
-  for testIndex = 1, #testLines do
-    if (testLines[testIndex] == reference) then
-      return testIndex
-    end
-  end
-  return 0
-end
-
 function search_commons.sortCmpTable(a, b)
   return a[2] > b[2]
 end
@@ -24,5 +15,3 @@ function search_commons.printCmpTable(cmpTable)
 end
 
 return search_commons
-
-
