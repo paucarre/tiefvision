@@ -10,9 +10,29 @@ local paths = require('paths')
 local torchFolder = paths.thisfile('../..')
 package.path = string.format("%s;%s/?.lua", os.getenv("LUA_PATH"), torchFolder)
 
-local torch = require 'torch'
 local redis = require 'redis'
-local redisClient = nil
+
+local function removeDatabaseFromKey(key, database)
+  -- redis key format is "database:filename"
+  -- to remove database, sub requires database length + 1
+  -- to remove the column, sub requires + 1
+  return string.sub(key, #database + 2)
+end
+
+local function toRedisProtocol(...)
+  local args = {...}
+  local argsLength = #args
+
+  local redisProtocol = "*" .. argsLength .. "\r\n"
+  for i = 1, argsLength do
+    local arg = tostring(args[i])
+
+    redisProtocol = redisProtocol .. "$" .. #arg .. "\r\n"
+    redisProtocol = redisProtocol .. arg .. "\r\n"
+  end
+
+  return redisProtocol
+end
 
 local tiefvision_redis_io = {}
 function tiefvision_redis_io.read(database, key)
@@ -46,28 +66,6 @@ function tiefvision_redis_io.keys(database)
   end
 
   return keys
-end
-
-function removeDatabaseFromKey(key, database)
-  -- redis key format is "database:filename"
-  -- to remove database, sub requires database length + 1
-  -- to remove the column, sub requires + 1
-  return string.sub(key, #database + 2)
-end
-
-function toRedisProtocol(...)
-  local args = {...}
-  local argsLength = #args
-
-  local redisProtocol = "*" .. argsLength .. "\r\n"
-  for i = 1, argsLength do
-    local arg = tostring(args[i])
-
-    redisProtocol = redisProtocol .. "$" .. #arg .. "\r\n"
-    redisProtocol = redisProtocol .. arg .. "\r\n"
-  end
-
-  return redisProtocol
 end
 
 local factory = {}

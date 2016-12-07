@@ -7,12 +7,12 @@ package.path = string.format("%s;%s/?.lua", os.getenv("LUA_PATH"), torchFolder)
 
 require 'inn'
 require 'optim'
-require 'torch'
 require 'xlua'
+local torch = require 'torch'
 
 local tiefvision_commons = require '0-tiefvision-commons/tiefvision_commons'
 
-function getTestError(model, index)
+local function getTestError(model, index)
   local testIn = torch.load(tiefvision_commons.dataPath('bbox-test-in/1.data'))
   local testOut = torch.load(tiefvision_commons.dataPath('bbox-test-out/1.data'))
   local mean = torch.load(tiefvision_commons.modelPath('bbox-train-mean'))
@@ -35,7 +35,7 @@ function getTestError(model, index)
   return errVec, errRandVec
 end
 
-function loadSavedModelConv(index)
+local function loadSavedModelConv(index)
   return torch.load(tiefvision_commons.modelPath('locatorconv-' .. index .. '.model'))
 end
 

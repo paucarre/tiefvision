@@ -8,26 +8,35 @@ package.path = string.format("%s;%s/?.lua", os.getenv("LUA_PATH"), torchFolder)
 require 'nn'
 require 'inn'
 require 'image'
+local torch = require 'torch'
 local tiefvision_commons = require '0-tiefvision-commons/tiefvision_commons'
 
 local batch_size = 64
 
+local function getEncodedInput(name, encoder)
+  print(name)
+  local input = tiefvision_commons.load(name)
+  local encodedInput = encoder:forward(input)[2]
+  collectgarbage()
+  return encodedInput
+end
+
 -- TODO: we are wasting at most 63 samples due to batching
-function loadData(encoder, lines)
+local function loadData(encoder, lines)
   local batches = #lines / batch_size
   local inputs = torch.Tensor(batches, batch_size, 384, 11, 11):cuda()
   for batch = 1, batches do
     for batch_el = 1, batch_size do
       local lineIndex = ((batch - 1) * batch_size) + batch_el
       local fileName = lines[lineIndex]
-      local encodedInput = encodedInput(fileName, encoder)
+      local encodedInput = getEncodedInput(fileName, encoder)
       inputs[batch][batch_el] = inputs[batch][batch_el]:set(encodedInput)
     end
   end
   return inputs
 end
 
-function getFilesAsTable(prefix)
+local function getFilesAsTable(prefix)
   local trainingFiles = {}
   for cl = 0, 1 do
     local file_path = tiefvision_commons.resourcePath('bounding-boxes', cl .. "-" .. prefix .. ".txt")
@@ -38,25 +47,17 @@ function getFilesAsTable(prefix)
   return trainingFiles
 end
 
-function encodedInput(name, encoder)
-  print(name)
-  local input = tiefvision_commons.load(name)
-  local encodedInput = encoder:forward(input)[2]
-  collectgarbage()
-  return encodedInput
-end
-
-function testSavedData(data)
+local function testSavedData(data)
   for i = 1, data:size()[1] do
     assert(torch.mean(data[i]) > 0.01, 'the mean of the data should no be zero')
   end
 end
 
-function getFile(type, cl, i)
+local function getFile(type, cl, i)
   return tiefvision_commons.dataPath('classification', cl, type, i .. '.data')
 end
 
-function encodeData(type, encoder)
+local function encodeData(type, encoder)
   for cl = 0, 1 do
     local files = getFilesAsTable(type)
     print('Class ' .. cl .. ' with files ' .. #files[cl + 1])

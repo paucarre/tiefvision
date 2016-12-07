@@ -9,10 +9,27 @@ require 'nn'
 require 'inn'
 require 'image'
 require 'lfs'
+local torch = require 'torch'
 
 local tiefvision_commons = require '0-tiefvision-commons/tiefvision_commons'
 
-function generateDatabase(imageEncoder)
+local function saveEncoding(dataFolder, destFolder, imageName, imageEncoder)
+  local imageInput = torch.load(dataFolder .. '/' .. imageName)
+  imageInput = imageInput:transpose(1, 3)
+  local encodedImage = imageEncoder:forward(imageInput):double()
+  torch.save(destFolder .. '/' .. imageName, encodedImage)
+end
+
+local function generateDatabaseForFolders(dataFolder, destFolder, imageEncoder)
+  local imageFiles = tiefvision_commons.getFiles(dataFolder)
+  for imageIndex = 1, #imageFiles do
+    local imageFile = imageFiles[imageIndex]
+    print(imageFile)
+    saveEncoding(dataFolder, destFolder, imageFile, imageEncoder)
+  end
+end
+
+local function generateDatabase(imageEncoder)
   -- unflipped
   local dataFolder = tiefvision_commons.dataPath('db/similarity/img-enc-cnn-encoder')
   local destFolder = tiefvision_commons.dataPath('db/similarity/img-similarity-deeprank')
@@ -24,27 +41,11 @@ function generateDatabase(imageEncoder)
   generateDatabaseForFolders(dataFolderFlipped, destFolderFlipped, imageEncoder)
 end
 
-function generateDatabaseForFolders(dataFolder, destFolder, imageEncoder)
-  local imageFiles = tiefvision_commons.getFiles(dataFolder)
-  for imageIndex = 1, #imageFiles do
-    local imageFile = imageFiles[imageIndex]
-    print(imageFile)
-    saveEncoding(dataFolder, destFolder, imageFile, imageEncoder)
-  end
-end
-
-function saveEncoding(dataFolder, destFolder, imageName, imageEncoder)
-  local imageInput = torch.load(dataFolder .. '/' .. imageName)
-  imageInput = imageInput:transpose(1, 3)
-  local encodedImage = imageEncoder:forward(imageInput):double()
-  torch.save(destFolder .. '/' .. imageName, encodedImage)
-end
-
-function loadModel()
+local function loadModel()
   return torch.load(tiefvision_commons.modelPath('similarity.model'))
 end
 
-function removeReshapeModule(imageEncoder)
+local function removeReshapeModule(imageEncoder)
   imageEncoder:remove(2)
   return imageEncoder
 end

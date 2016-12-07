@@ -11,7 +11,7 @@ package.path = string.format("%s;%s/?.lua", os.getenv("LUA_PATH"), torchFolder)
 
 local tiefvision_commons = require('0-tiefvision-commons/tiefvision_commons')
 
-function argument(arg)
+local function argument(arg)
   local prefix = '^%-%-?config'
   local prefixAndEqual = prefix .. '='
 

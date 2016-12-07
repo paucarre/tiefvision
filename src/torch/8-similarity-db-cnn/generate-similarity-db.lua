@@ -7,15 +7,15 @@ package.path = string.format("%s;%s/?.lua", os.getenv("LUA_PATH"), torchFolder)
 
 require 'inn'
 require 'optim'
-require 'torch'
 require 'xlua'
 require 'lfs'
 require 'image'
+local torch = require 'torch'
 
 local tiefvision_commons = require '0-tiefvision-commons/tiefvision_commons'
 local similarity_db_lib = require '8-similarity-db-cnn/similarity_db_lib'
 
-function createDb(sourceFolder, destinationFolder)
+local function createDb(sourceFolder, destinationFolder)
   local files = tiefvision_commons.getFiles(sourceFolder)
   local encoder = similarity_db_lib.getEncoder()
   for fileIndex = 1, #files do

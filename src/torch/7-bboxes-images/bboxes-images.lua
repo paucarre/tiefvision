@@ -9,13 +9,13 @@ require 'inn'
 require 'optim'
 require 'torch'
 require 'xlua'
-require 'lfs'
+local lfs = require 'lfs'
 
 local image = require 'image'
 local tiefvision_commons = require '0-tiefvision-commons/tiefvision_commons'
 local bboxlib = require '6-bboxlib/bboxlib'
 
-function getFiles(folder)
+local function getFiles(folder)
   local files = {}
   for file in lfs.dir(folder) do
     if (lfs.attributes(folder .. '/' .. file, "mode") == "file") then
@@ -43,7 +43,7 @@ for fileIndex = 1, #files do
       print(xmin, ymin, xmax, ymax)
       local inputCropped = image.crop(input, xmin, ymin, xmax, ymax)
       image.save(bboxesFolder .. '/' .. i .. '/' .. files[fileIndex], inputCropped)
-      -- generate flipped images 
+      -- generate flipped images
       local flippedInput = image.hflip(inputCropped)
       image.save(flippedBboxesFolder .. '/' .. i .. '/' .. files[fileIndex], flippedInput)
       collectgarbage()

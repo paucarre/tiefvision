@@ -12,10 +12,24 @@ require 'nn'
 require 'inn'
 require 'image'
 require 'lfs'
+local torch = require 'torch'
 
 local tiefvision_commons = require '0-tiefvision-commons/tiefvision_commons'
 
-function loadData(encoder, filename)
+
+local function encodedInputOutput(trainFile, encoder)
+  local name, widht, height, xmin, ymin, xmax, ymax = string.match(trainFile, "(.+)___(%d+)_(%d+)_(-?%d+)_(-?%d+)_(-?%d+)_(-?%d+).jpg")
+  local input = tiefvision_commons.load(trainFile)
+  local encodedInput = encoder:forward(input)[2]
+  local target = torch.CudaTensor(4)
+  target[1] = tonumber(xmin)
+  target[2] = tonumber(ymin)
+  target[3] = tonumber(xmax)
+  target[4] = tonumber(ymax)
+  return encodedInput, target
+end
+
+local function loadData(encoder, filename)
   local outputsBatch = {}
   local inputsBatch = {}
   local lines = tiefvision_commons.getLines(filename)
@@ -43,19 +57,12 @@ function loadData(encoder, filename)
   return inputsBatch, outputsBatch
 end
 
-function encodedInputOutput(trainFile, encoder)
-  local name, widht, height, xmin, ymin, xmax, ymax = string.match(trainFile, "(.+)___(%d+)_(%d+)_(-?%d+)_(-?%d+)_(-?%d+)_(-?%d+).jpg")
-  local input = tiefvision_commons.load(trainFile)
-  local encodedInput = encoder:forward(input)[2]
-  local target = torch.CudaTensor(4)
-  target[1] = tonumber(xmin)
-  target[2] = tonumber(ymin)
-  target[3] = tonumber(xmax)
-  target[4] = tonumber(ymax)
-  return encodedInput, target
+local function loadDataFromFolder(bboxFolder, i)
+  local filePath = tiefvision_commons.dataPath(bboxFolder, i .. '.data')
+  return torch.load(filePath)
 end
 
-function testStdDevNonZero(size, folder)
+local function testStdDevNonZero(size, folder)
   for ig = 1, size do
     local data = loadDataFromFolder(folder, ig)
     for i = 1, data:size()[1] do
@@ -64,7 +71,7 @@ function testStdDevNonZero(size, folder)
   end
 end
 
-function stats(output)
+local function stats(output)
   local globalMean = torch.zeros(4):cuda()
   local globalStd = torch.zeros(4):cuda()
   for i = 1, #output do
@@ -76,7 +83,7 @@ function stats(output)
   return globalMean / #output, globalStd / #output
 end
 
-function postprocessOutput(output, mean, std)
+local function postprocessOutput(output, mean, std)
   local globalOutZeroMeanOneStd = {}
   for i = 1, #output do
     local meanRep = torch.repeatTensor(mean, output[i]:size()[1], 1)
@@ -88,7 +95,7 @@ function postprocessOutput(output, mean, std)
   return globalOutZeroMeanOneStd
 end
 
-function getBoundingBoxes(output)
+local function getBoundingBoxes(output)
   local avg = torch.load(tiefvision_commons.modelPath('bbox-train-mean'))
   local std = torch.load(tiefvision_commons.modelPath('bbox-train-std'))
   local avgExt = torch.repeatTensor(avg, output:size()[1], 1)
@@ -97,7 +104,7 @@ function getBoundingBoxes(output)
   return outputTrans
 end
 
-function testinLoadTest(testin)
+local function testinLoadTest(testin)
   testStdDevNonZero(#testin, 'bbox-test-in')
   for i = 1, #testin do
     local testinLoad = loadDataFromFolder('bbox-test-in', i)
@@ -105,29 +112,29 @@ function testinLoadTest(testin)
   end
 end
 
-function testEq(actual, savedFolder)
+local function testEq(actual, savedFolder)
   for i = 1, #actual do
     local saved = loadDataFromFolder(savedFolder, i)
     assert(torch.eq(actual[i], saved), 'tensor not properly saved')
   end
 end
 
-function traininLoadTest(trainin)
+local function traininLoadTest(trainin)
   testStdDevNonZero(#trainin, 'bbox-train-in')
   testEq(trainin, 'bbox-train-in')
 end
 
-function testBoundingBoxes(trainout, trainoutProc)
+local function testBoundingBoxes(trainout, trainoutProc)
   for i = 1, #trainout do
     local reconstructedBoundingBox = getBoundingBoxes(trainoutProc[i])
     assert(torch.mean(torch.abs(reconstructedBoundingBox - trainout[i])) < 0.0001, 'the reconstructed bounding box should be the original one')
   end
 end
 
-function saveEncodedData()
+local function saveEncodedData()
   local encoder = torch.load(tiefvision_commons.modelPath('encoder.model'))
   local trainin, trainout = loadData(encoder, tiefvision_commons.resourcePath('bounding-boxes/extendedTRAIN.txt'))
-  local mean, std = stats(trainout, meanfile, stdfile)
+  local mean, std = stats(trainout)
   torch.save(tiefvision_commons.modelPath('bbox-train-mean'), mean)
   torch.save(tiefvision_commons.modelPath('bbox-train-std'), std)
 
@@ -139,7 +146,7 @@ function saveEncodedData()
 
   local testin, testout = loadData(encoder, tiefvision_commons.resourcePath('bounding-boxes/extendedTEST.txt'))
   local testoutProc = postprocessOutput(testout, mean, std)
-  local meantest, stdtest = stats(testoutProc)
+  meantest, stdtest = stats(testoutProc)
   assert(torch.mean(meantest) < 0.2, 'test mean should be close to zero')
   assert(math.abs(torch.mean(stdtest) - 1) < 0.3, 'test std should be close to one')
 
@@ -154,11 +161,6 @@ function saveEncodedData()
     torch.save(tiefvision_commons.dataPath('bbox-train-out', i .. '.data'), trainoutTr)
   end
   return testin, testoutProc, trainin, trainoutProc, trainout
-end
-
-function loadDataFromFolder(bboxFolder, i)
-  local filePath = tiefvision_commons.dataPath(bboxFolder, i .. '.data')
-  return torch.load(filePath)
 end
 
 local testin, testoutProc, trainin, trainoutProc, trainout = saveEncodedData()

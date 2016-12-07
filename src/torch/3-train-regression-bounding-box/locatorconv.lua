@@ -6,6 +6,7 @@ require "inn"
 require 'optim'
 require 'torch'
 require 'xlua'
+local nn = require 'nn'
 
 local locatorconv = {}
 

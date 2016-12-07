@@ -5,14 +5,15 @@
 local torchFolder = require('paths').thisfile('..')
 package.path = string.format("%s;%s/?.lua", os.getenv("LUA_PATH"), torchFolder)
 
-require 'nn'
 require 'inn'
 require 'image'
+local nn = require 'nn'
+local torch = require 'torch'
 
 local inputSize = 11 * 11 * 384
 local tiefvision_commons = require '0-tiefvision-commons/tiefvision_commons'
 
-function getSimilarityModel()
+local function getSimilarityModel()
 
   local leftImage = nn.Sequential()
   --leftImage:add(nn.SpatialConvolutionMM(11, 11, 1, 1, 1, 1, 0, 0):cuda())
@@ -26,7 +27,7 @@ function getSimilarityModel()
   --leftImage:add(nn.SpatialConvolutionMM(512, 126, 1, 1, 1, 1, 0, 0):cuda())
   --leftImage:add(nn.ReLU(true):cuda())
   --leftImage:add(nn.Dropout(0.5):cuda())
-  leftImage:add(nn.Reshape(384 * 11 * 11):cuda())
+  leftImage:add(nn.Reshape(inputSize):cuda())
 
   local rightImage = leftImage:clone('weight', 'bias')
 
@@ -49,12 +50,12 @@ function getSimilarityModel()
   return similarityModel:cuda()
 end
 
-function getCriterion()
+local function getCriterion()
   local criterion = nn.MarginRankingCriterion(0.1):cuda()
   return criterion
 end
 
-function gradUpdate(similarityModel, x, criterion, learningRate)
+local function gradUpdate(similarityModel, x, criterion, learningRate)
   local pred = similarityModel:forward(x)
   local err = criterion:forward(pred, torch.ones(32):cuda())
   local gradCriterion = criterion:backward(pred, torch.ones(32):cuda())
@@ -64,15 +65,7 @@ function gradUpdate(similarityModel, x, criterion, learningRate)
   return err
 end
 
-function getTestSet()
-  return getDataSet('similarity-db-test')
-end
-
-function getTrainingSet()
-  return getDataSet('similarity-db-train')
-end
-
-function getDataSet(file)
+local function getDataSet(file)
   local lines = tiefvision_commons.getLines(tiefvision_commons.resourcePath('dresses-db', file))
   local trainingSet = {}
   for i = 1, #lines do
@@ -82,24 +75,18 @@ function getDataSet(file)
   return trainingSet
 end
 
+local function getTestSet()
+  return getDataSet('similarity-db-test')
+end
+
+local function getTrainingSet()
+  return getDataSet('similarity-db-train')
+end
+
 local criterion = getCriterion()
 local learningRate = 0.0001
 
-function trainBatchGradUpdate(similarityModel, batchSize, initialTrainingIndex, trainingSet, batchSet)
-  for batchIndex = 1, batchSize do
-    local trainingIndex = initialTrainingIndex + batchIndex - 1
-    -- print(trainingSet[trainingIndex][1] .. ' ' .. trainingSet[trainingIndex][2] .. ' ' .. trainingSet[trainingIndex][3])
-    local reference, similar, different = getReferenceSimilarDifferent(trainingSet[trainingIndex])
-    batchSet[1][1][batchIndex] = reference
-    batchSet[1][2][batchIndex] = similar
-    batchSet[2][1][batchIndex] = reference
-    batchSet[2][2][batchIndex] = different
-  end
-  local trainError = gradUpdate(similarityModel, batchSet, criterion, learningRate)
-  return trainError
-end
-
-function getHeightWindow(input, heightStart)
+local function getHeightWindow(input, heightStart)
   local windowInput = torch.Tensor(11, 11, 384):cuda()
   local trInput = input:transpose(1, 3)
   for w = 1, 11 do
@@ -110,7 +97,7 @@ function getHeightWindow(input, heightStart)
   return windowInput:transpose(1, 3)
 end
 
-function getReferenceSimilarDifferentRaw(datasource)
+local function getReferenceSimilarDifferentRaw(datasource)
   local encodedFolder = tiefvision_commons.dataPath('db/similarity/img-enc-cnn-encoder')
   local flippedEncodedFolder = tiefvision_commons.dataPath('db/similarity/img-enc-cnn-encoder-flipped')
   local reference = torch.load(encodedFolder .. '/' .. datasource[1]):cuda()
@@ -124,7 +111,7 @@ function getReferenceSimilarDifferentRaw(datasource)
   return reference:transpose(1, 3):cuda(), similar:transpose(1, 3):cuda(), different:transpose(1, 3):cuda()
 end
 
-function getReferenceSimilarDifferent(datasource)
+local function getReferenceSimilarDifferent(datasource)
   local reference, similar, different = getReferenceSimilarDifferentRaw(datasource)
 
   local minHeight = math.min(math.min(reference:size()[2], similar:size()[2]), different:size()[2]) - 11 + 1
@@ -136,33 +123,21 @@ function getReferenceSimilarDifferent(datasource)
   return referenceW, similarW, differentW
 end
 
-
-function train(similarityModel)
-  math.randomseed(os.time())
-  local batchSize = 32
-  local trainingSet = getTrainingSet()
-  local trainIndex = 1
-  local batchSet = torch.Tensor(2, 2, batchSize, 384, 11, 11):cuda()
-  while trainIndex <= #trainingSet - batchSize do
-    similarityModel:training()
-    local trainError = trainBatchGradUpdate(similarityModel, batchSize, trainIndex, trainingSet, batchSet)
-    print('TRAIN_ERROR:' .. trainError)
-    if (((trainIndex - 1) / batchSize) % 10 == 0) then
-      print("Saving model...")
-      saveModel(similarityModel)
-      print("Model saved")
-      testModel(similarityModel)
-    end
-    trainIndex = trainIndex + batchSize
+local function trainBatchGradUpdate(similarityModel, batchSize, initialTrainingIndex, trainingSet, batchSet)
+  for batchIndex = 1, batchSize do
+    local trainingIndex = initialTrainingIndex + batchIndex - 1
+    -- print(trainingSet[trainingIndex][1] .. ' ' .. trainingSet[trainingIndex][2] .. ' ' .. trainingSet[trainingIndex][3])
+    local reference, similar, different = getReferenceSimilarDifferent(trainingSet[trainingIndex])
+    batchSet[1][1][batchIndex] = reference
+    batchSet[1][2][batchIndex] = similar
+    batchSet[2][1][batchIndex] = reference
+    batchSet[2][2][batchIndex] = different
   end
+  local trainError = gradUpdate(similarityModel, batchSet, criterion, learningRate)
+  return trainError
 end
 
-function testModel(similarityModel)
-  local testOk, testNum = test(similarityModel)
-  print('Test Rate:' .. testOk / testNum, testOk .. ' out of ' .. testNum)
-end
-
-function test(similarityModel)
+local function test(similarityModel)
   local imagesDist = similarityModel.modules[1].modules[1]
   -- local linear1 = imagesDistSimilar.modules[1].modules[1].modules[5]
   -- local linear2 = imagesDistDifferent.modules[1].modules[2].modules[5]
@@ -181,7 +156,6 @@ function test(similarityModel)
     local currentCorrectRank = 0.0
     --if(testSet[testIndex][1] ~= testSet[testIndex][2]) then
     local reference, similar, different = getReferenceSimilarDifferentRaw(testSet[testIndex])
-    local minHeight = math.min(math.min(reference:size()[2], similar:size()[2]), different:size()[2]) - 11
     for h = 1, 3 do
       local referenceW = getHeightWindow(reference, h)
       local similarW = getHeightWindow(similar, h)
@@ -212,11 +186,7 @@ function test(similarityModel)
   return correctRank, successfulTestAttempts
 end
 
-function saveModel(model)
-  torch.save(tiefvision_commons.modelPath('similarity.model'), model)
-end
-
-function loadModel()
+local function loadModel()
   local modelPath = tiefvision_commons.modelPath('similarity.model')
   if (tiefvision_commons.fileExists(modelPath)) then
     return torch.load(modelPath)
@@ -225,7 +195,36 @@ function loadModel()
   end
 end
 
-function getOptions()
+local function saveModel(model)
+  torch.save(tiefvision_commons.modelPath('similarity.model'), model)
+end
+
+local function testModel(similarityModel)
+  local testOk, testNum = test(similarityModel)
+  print('Test Rate:' .. testOk / testNum, testOk .. ' out of ' .. testNum)
+end
+
+local function train(similarityModel)
+  math.randomseed(os.time())
+  local batchSize = 32
+  local trainingSet = getTrainingSet()
+  local trainIndex = 1
+  local batchSet = torch.Tensor(2, 2, batchSize, 384, 11, 11):cuda()
+  while trainIndex <= #trainingSet - batchSize do
+    similarityModel:training()
+    local trainError = trainBatchGradUpdate(similarityModel, batchSize, trainIndex, trainingSet, batchSet)
+    print('TRAIN_ERROR:' .. trainError)
+    if (((trainIndex - 1) / batchSize) % 10 == 0) then
+      print("Saving model...")
+      saveModel(similarityModel)
+      print("Model saved")
+      testModel(similarityModel)
+    end
+    trainIndex = trainIndex + batchSize
+  end
+end
+
+local function getOptions()
   local cmd = torch.CmdLine()
   cmd:text()
   cmd:text('Deep Rank Hinge Loss Training')
@@ -237,7 +236,7 @@ function getOptions()
   return cmd:parse(arg)
 end
 
-function getModel(reset)
+local function getModel(reset)
   if (reset) then
     return getSimilarityModel()
   else

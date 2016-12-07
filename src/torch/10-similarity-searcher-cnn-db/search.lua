@@ -7,15 +7,15 @@ package.path = string.format("%s;%s/?.lua", os.getenv("LUA_PATH"), torchFolder)
 
 require 'inn'
 require 'optim'
-require 'torch'
 require 'xlua'
 require 'lfs'
+local torch = require 'torch'
 
 local tiefvision_config_loader = require '0-tiefvision-commons/tiefvision_config_loader'
 local search_commons = require '10-similarity-searcher-cnn-db/search_commons'
 local database = tiefvision_config_loader.load().database
 
-function getTestError(reference)
+local function getTestError(reference)
   local similarityDb = 'image-unsupervised-similarity-database'
   local similarities = database.read(similarityDb, reference)
 
@@ -28,7 +28,7 @@ function getTestError(reference)
   search_commons.printCmpTable(comparisonTable)
 end
 
-function getOptions()
+local function getOptions()
   local cmd = torch.CmdLine()
   cmd:text()
   cmd:text('Unsupervised image search from precomputed database of distances between each pair of images in the master folder.')

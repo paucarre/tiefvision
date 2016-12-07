@@ -4,7 +4,7 @@
 
 local image = require 'image'
 
-function detectGrayscale(imagePath)
+local function detectGrayscale(imagePath)
   local img = image.load(imagePath)
   if img:size()[1] == 3 then
     print("C")

@@ -7,9 +7,10 @@ package.path = string.format("%s;%s/?.lua", os.getenv("LUA_PATH"), torchFolder)
 
 require 'inn'
 require 'optim'
-require 'torch'
 require 'xlua'
 require 'lfs'
+local torch = require 'torch'
+local image = require 'image'
 
 local tiefvision_commons = require '0-tiefvision-commons/tiefvision_commons'
 local tiefvision_config_loader = require '0-tiefvision-commons/tiefvision_config_loader'
@@ -18,7 +19,7 @@ local similarity_db_lib = require '8-similarity-db-cnn/similarity_db_lib'
 local similarity_lib = require '9-similarity-db/similarity_lib'
 local search_commons = require '10-similarity-searcher-cnn-db/search_commons'
 
-function getTestError(referenceEncoding)
+local function getTestError(referenceEncoding)
   local dataFolder = tiefvision_commons.dataPath('encoded-images')
   local testLines = tiefvision_commons.getFiles(dataFolder)
   local comparisonTable = {}
@@ -32,7 +33,7 @@ function getTestError(referenceEncoding)
   search_commons.printCmpTable(comparisonTable)
 end
 
-function getImage(fileName, imagesFolder)
+local function getImage(fileName, imagesFolder)
   local input = bboxlib.loadImageFromFile(imagesFolder .. '/' .. fileName)
   local bboxes = bboxlib.getImageBoundingBoxesTable(input, 1)
   local xmin = bboxes[1][1]
@@ -46,8 +47,7 @@ function getImage(fileName, imagesFolder)
   return encodedOutput:double()
 end
 
-
-function getOptions()
+local function getOptions()
   local cmd = torch.CmdLine()
   cmd:text()
   cmd:text('Unsupervised image search from an image file.')

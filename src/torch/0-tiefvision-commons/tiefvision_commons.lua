@@ -9,6 +9,7 @@
 
 local image = require 'image'
 local lfs = require 'lfs'
+local torch = require 'torch'
 local tiefvision_commons = {}
 
 function tiefvision_commons.fileExists(name)

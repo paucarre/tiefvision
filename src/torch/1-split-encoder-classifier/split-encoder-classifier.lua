@@ -11,9 +11,11 @@
 local torchFolder = require('paths').thisfile('..')
 package.path = string.format("%s;%s/?.lua", os.getenv("LUA_PATH"), torchFolder)
 
-require 'loadcaffe'
 require 'image'
 require 'inn'
+local loadcaffe = require 'loadcaffe'
+local nn = require 'nn'
+local torch = require 'torch'
 
 local tiefvision_commons = require '0-tiefvision-commons/tiefvision_commons'
 
@@ -21,7 +23,7 @@ local proto_name = 'deploy.prototxt'
 local model_name = 'nin_imagenet.caffemodel'
 local image_name = 'Goldfish3.jpg'
 
-local net = loadcaffe.load(proto_name, './nin_imagenet.caffemodel'):cuda()
+local net = loadcaffe.load(proto_name, model_name):cuda()
 net.modules[#net.modules] = nil -- remove the top softmax
 
 net:evaluate()
@@ -33,7 +35,7 @@ local loss, output = net:forward(im):view(-1):float():sort(true)
 
 -- create classification encoder
 local encoder = net:clone()
-for i = 1, 9 do
+for _ = 1, 9 do
   encoder:remove(21)
 end
 local concat = nn.ConcatTable()
@@ -45,7 +47,7 @@ print(encoder)
 
 -- create classifier
 local classifier = net:clone()
-for i = 1, 21 do
+for _ = 1, 21 do
   classifier:remove(1)
 end
 
@@ -69,17 +71,17 @@ end
 
 -- Test encoder reduction
 local fakeIm = torch.Tensor(3, 224, 224):cuda()
-local outputEnc = encoder:forward(fakeIm)
+outputEnc = encoder:forward(fakeIm)
 assert(outputEnc[1]:size()[3] == 6, 'the encoder size for 224 input size should be 6')
 assert(outputEnc[2]:size()[3] == (outputEnc[1]:size()[3] * 2) - 1, 'the regression encoder size for 2240 input size should be the double of the classification one')
 
 fakeIm = torch.Tensor(3, 224, 224 * 10):cuda()
-local outputEnc = encoder:forward(fakeIm)
+outputEnc = encoder:forward(fakeIm)
 assert(outputEnc[1]:size()[3] == 69, 'the encoder size for 2240 input size should be 69')
 assert(outputEnc[2]:size()[3] == (outputEnc[1]:size()[3] * 2) - 1, 'the regression encoder size for 2240 input size should be the double of the classification one')
 
 fakeIm = torch.Tensor(3, 224, 224 * 15):cuda()
-local outputEnc = encoder:forward(fakeIm)
+outputEnc = encoder:forward(fakeIm)
 assert(outputEnc[1]:size()[3] == 104, 'the encoder size for 4480 input size should be 104')
 assert(outputEnc[2]:size()[3] == (outputEnc[1]:size()[3] * 2) - 1, 'the regression encoder size for 224 * 15 input size should be the double of the classification one')
 

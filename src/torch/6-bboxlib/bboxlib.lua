@@ -7,28 +7,27 @@ package.path = string.format("%s;%s/?.lua", os.getenv("LUA_PATH"), torchFolder)
 
 require 'inn'
 require 'optim'
-require 'torch'
 require 'xlua'
-require 'lfs'
-require 'image'
+local image = require 'image'
+local torch = require 'torch'
 
 local tiefvision_commons = require '0-tiefvision-commons/tiefvision_commons'
 
 local bboxlib = {}
 
-function loadLocator(index)
+local function loadLocator(index)
   return torch.load(tiefvision_commons.modelPath('locatorconv-' .. index .. '.model'))
 end
 
-function loadClassifier()
+local function loadClassifier()
   return torch.load(tiefvision_commons.modelPath('classifier.model'))
 end
 
-function loadEncoder()
+local function loadEncoder()
   return torch.load(tiefvision_commons.modelPath('encoder.model'))
 end
 
-function getBoundingBoxes(model, encodedInputs, index)
+local function getBoundingBoxes(model, encodedInputs, index)
   local avg = torch.load(tiefvision_commons.modelPath('bbox-train-mean'))[index]
   local avgTensor = torch.Tensor(1):cuda()
   avgTensor[1] = avg
@@ -44,7 +43,11 @@ function getBoundingBoxes(model, encodedInputs, index)
   return outputTrans
 end
 
-function toOutputCoordinates(x, y, reduction, xdelta, ydelta)
+local function toOutputCoordinate(coord)
+  return math.max(math.floor((math.floor((math.floor((coord - 10) / 4) - 2) / 2) - 2) / 2) - 2 + 1 - 10, 1)
+end
+
+local function toOutputCoordinates(x, y) --, reduction, xdelta, ydelta)
   --  local xo = math.floor((x - (xdelta / 2.0)) / reduction)
   --  local yo = math.floor((y - (ydelta / 2.0)) / reduction)
   --  if xo <= 0 then xo = 1 end
@@ -53,29 +56,15 @@ function toOutputCoordinates(x, y, reduction, xdelta, ydelta)
   return toOutputCoordinate(x), toOutputCoordinate(y)
 end
 
-function toOutputCoordinate(coord)
-  return math.max(math.floor((math.floor((math.floor((coord - 10) / 4) - 2) / 2) - 2) / 2) - 2 + 1 - 10, 1)
-end
-
-function toImageCoordinates(x, y)
-  return toImageCoordinate(x), toImageCoordinate(y)
-end
-
-function toImageCoordinate(coord)
+local function toImageCoordinate(coord)
   return ((((((coord - 1 + 2 + 10) * 2) + 2) * 2) + 2) * 4) + 10 + 7 - 224
 end
 
---  Equations:
---    Ow = (Iw - delta) / reduction --> delta = Iw - (Ow * reduction)
---    Ox = (Ix - delta) / reduction
---    Ix = (Ox * reduction) + delta
-function getDeltas(imageW, imageH, outputW, outputH, reduction)
-  local xdelta = imageW - (outputW * reduction)
-  local ydelta = imageH - (outputH * reduction)
-  return xdelta, ydelta
+local function toImageCoordinates(x, y)
+  return toImageCoordinate(x), toImageCoordinate(y)
 end
 
-function meanBoundingBox(boundingBoxes)
+local function meanBoundingBox(boundingBoxes)
   local sum = { 0.0, 0.0, 0.0, 0.0 }
   for i = 1, #boundingBoxes do
     local boundingBox = boundingBoxes[i]
@@ -85,20 +74,20 @@ function meanBoundingBox(boundingBoxes)
   return mean
 end
 
-function boundingBoxOutputCenter(boundingBox, reduction, xdelta, ydelta)
+local function boundingBoxOutputCenter(boundingBox)
   local xcenter = boundingBox[1] + ((boundingBox[3] - boundingBox[1]) / 2.0)
   local ycenter = boundingBox[2] + ((boundingBox[4] - boundingBox[2]) / 2.0)
-  return toOutputCoordinates(xcenter, ycenter, reduction, xdelta, ydelta)
+  return toOutputCoordinates(xcenter, ycenter)
 end
 
-function getExpectedBoundingBox(boundingBoxes, probs, imageW, imageH, reduction, xdelta, ydelta)
+local function getExpectedBoundingBox(boundingBoxes)
   local mean = meanBoundingBox(boundingBoxes)
-  local xcenter, ycenter = boundingBoxOutputCenter(mean, reduction, xdelta, ydelta)
+  local xcenter, ycenter = boundingBoxOutputCenter(mean)
   local eminx, eminy, emaxx, emaxy = 0.0, 0.0, 0.0, 0.0
   local eminxCount, eminyCount, emaxxCount, emaxyCount = 0, 0, 0, 0
   for i = 1, #boundingBoxes do
     local boundingBox = boundingBoxes[i]
-    local minx, miny, maxx, maxy, prob, xo, yo = boundingBox[1], boundingBox[2], boundingBox[3], boundingBox[4], boundingBox[5], boundingBox[6], boundingBox[7]
+    local minx, miny, maxx, maxy, xo, yo = boundingBox[1], boundingBox[2], boundingBox[3], boundingBox[4], boundingBox[6], boundingBox[7]
     if xo < xcenter then
       eminx = eminx + minx
       eminxCount = eminxCount + 1
@@ -137,18 +126,7 @@ function getExpectedBoundingBox(boundingBoxes, probs, imageW, imageH, reduction,
   return eminx / eminxCount, eminy / eminyCount, emaxx / emaxxCount, emaxy / emaxyCount
 end
 
-function getImageBoundingBox(x, y, bboxMinx, bboxMiny, bboxMaxx, bboxMaxy, imageW, imageH, reduction, xdelta, ydelta)
-  local xbi, ybi = toImageCoordinates(x, y)
-  local minx = xbi + bboxMinx[y][x][1]
-  local miny = ybi + bboxMiny[y][x][1]
-  local maxx = xbi + bboxMaxx[y][x][1]
-  local maxy = ybi + bboxMaxy[y][x][1]
-  minx, miny = cleanBoundingBox(minx, miny, imageW, imageH)
-  maxx, maxy = cleanBoundingBox(maxx, maxy, imageW, imageH)
-  return minx, miny, maxx, maxy
-end
-
-function cleanBoundingBox(x, y, imageW, imageH)
+local function cleanBoundingBox(x, y, imageW, imageH)
   if (x < 1) then
     x = 1
   elseif (x > imageW) then
@@ -162,28 +140,30 @@ function cleanBoundingBox(x, y, imageW, imageH)
   return math.floor(x), math.floor(y)
 end
 
+local function getImageBoundingBox(x, y, bboxMinx, bboxMiny, bboxMaxx, bboxMaxy, imageW, imageH)
+  local xbi, ybi = toImageCoordinates(x, y)
+  local minx = xbi + bboxMinx[y][x][1]
+  local miny = ybi + bboxMiny[y][x][1]
+  local maxx = xbi + bboxMaxx[y][x][1]
+  local maxy = ybi + bboxMaxy[y][x][1]
+  minx, miny = cleanBoundingBox(minx, miny, imageW, imageH)
+  maxx, maxy = cleanBoundingBox(maxx, maxy, imageW, imageH)
+  return minx, miny, maxx, maxy
+end
 
-function getEncodedInput(input)
+local function getEncodedInput(input)
   local encoder = loadEncoder()
   local encodedInput = encoder:forward(input)[2]
   return encodedInput, input:size()[3], input:size()[2]
 end
 
-function getEncodedLowInput(input)
-  local encoder = loadEncoder()
-  encoder:forward(input)
-  local lowModule = encoder.modules[7]
-  local lowInput = lowModule.output
-  return lowInput
-end
-
-function locate(encodedInput, index)
+local function locate(encodedInput, index)
   local locator = loadLocator(index)
   local boundingBoxes = getBoundingBoxes(locator, encodedInput, index)
   return boundingBoxes
 end
 
-function getProbabilities(encodedInput)
+local function getProbabilities(encodedInput)
   local classifier = loadClassifier()
   local classes = classifier:forward(encodedInput)
   return classes[1]
@@ -194,37 +174,7 @@ function bboxlib.loadImageFromFile(imagePath)
   return input
 end
 
-function getFiles()
-  local files = {}
-  local folder = tiefvision_commons.dataPath('db/high')
-  for file in lfs.dir(folder) do
-    if (lfs.attributes(folder .. '/' .. file, "mode") == "file") then
-      table.insert(files, file)
-    end
-  end
-  return files
-end
-
-function getTestImageFiles()
-  local files = {}
-  local folder = tiefvision_commons.resourcePath('dresses-db/master')
-  for file in lfs.dir(folder) do
-    if (lfs.attributes(folder .. '/' .. file, "mode") == "file") then
-      table.insert(files, folder .. '/' .. file)
-    end
-  end
-  return files
-end
-
-function encodeAndNormalizeImage(croppedScaledImage)
-  local croppedScaledImage = tiefvision_commons.loadImage(croppedScaledImage)
-  local encodedImage = getEncodedLowInput(croppedScaledImage)
-  local normEncodedImage = encodedImage
-  local transNormEncodedImage = normEncodedImage:transpose(1, 3)
-  return transNormEncodedImage
-end
-
-function getInitialScales(input)
+local function getInitialScales(input)
   local scaleBase
   if input:size()[2] > input:size()[3] then
     scaleBase = (1 * 224) / input:size()[3]
@@ -239,7 +189,7 @@ function getInitialScales(input)
   return scales
 end
 
-function getScaledImages(input, scales)
+local function getScaledImages(input, scales)
   local pyramidProc = {}
   local pyramid = image.gaussianpyramid(input, scales)
   for s = 1, #scales do
@@ -248,7 +198,7 @@ function getScaledImages(input, scales)
   return pyramidProc
 end
 
-function getBboxes(input, reduction)
+local function getBboxes(input)
   local encodedInput = getEncodedInput(input)
   local bboxMinx = locate(encodedInput, 1)
   local bboxMiny = locate(encodedInput, 2)
@@ -262,31 +212,26 @@ function getBboxes(input, reduction)
   for x = 1, bboxMinx:size()[2] do
     for y = 1, bboxMinx:size()[1] do
       if (probabilities[y][x] > 0.85) then
-        local xmin, ymin, xmax, ymax = getImageBoundingBox(x, y, bboxMinx, bboxMiny, bboxMaxx, bboxMaxy, width, height, reduction)
+        local xmin, ymin, xmax, ymax = getImageBoundingBox(x, y, bboxMinx, bboxMiny, bboxMaxx, bboxMaxy, width, height)
         bboxes[i] = { xmin, ymin, xmax, ymax, probabilities[y][x], x, y }
         i = i + 1
       end
     end
   end
-  return bboxes, probabilities, probDensity
+  return bboxes, probabilities
 end
 
-
-function getCroppedImage(input, reduction)
+local function getCroppedImage(input)
   local scale = getInitialScales(input)[2]
   local scaledImage = getScaledImages(input, { scale })[1]
-  local width, height = scaledImage:size()[3], scaledImage:size()[2]
-  local bboxes, probabilities, probDensity = getBboxes(scaledImage, reduction)
-  local xminNew, yminNew, xmaxNew, ymaxNew = getExpectedBoundingBox(bboxes, probabilities, width, height, reduction, xdelta, ydelta)
+  local bboxes, probabilities = getBboxes(scaledImage)
+  local xminNew, yminNew, xmaxNew, ymaxNew = getExpectedBoundingBox(bboxes)
   return xminNew / scale, yminNew / scale, xmaxNew / scale, ymaxNew / scale
 end
 
-
-
 function bboxlib.getImageBoundingBoxesTable(input)
-  local reduction = 32
   local boundingBoxes = {}
-  xmin, ymin, xmax, ymax = getCroppedImage(input, reduction)
+  local xmin, ymin, xmax, ymax = getCroppedImage(input)
   table.insert(boundingBoxes, { xmin, ymin, xmax, ymax })
   return boundingBoxes
 end

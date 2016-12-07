@@ -6,6 +6,7 @@ require "inn"
 require 'optim'
 require 'torch'
 require 'xlua'
+local nn = require 'nn'
 
 local classifierconv = {}
 
@@ -17,7 +18,7 @@ function classifierconv.loadModel()
   model:add(nn.SpatialConvolutionMM(384, nhiddens1, 11, 11, 1, 1, 0, 0))
   model:add(nn.ReLU())
   model:add(nn.SpatialConvolutionMM(nhiddens1, nhiddens2, 1, 1, 1, 1, 0, 0))
-  model:add(nn.ReLU()) 
+  model:add(nn.ReLU())
   model:add(nn.SpatialConvolutionMM(nhiddens2, noutputs, 1, 1, 1, 1, 0, 0))
   model:add(nn.Sigmoid())
   return model:cuda()

@@ -6,10 +6,12 @@ local torchFolder = require('paths').thisfile('..')
 package.path = string.format("%s;%s/?.lua", os.getenv("LUA_PATH"), torchFolder)
 
 require 'inn'
-require 'optim'
-require 'torch'
 require 'xlua'
-require 'lfs'
+local lfs = require 'lfs'
+local nn = require 'nn'
+local optim = require 'optim'
+local sys = require 'sys'
+local torch = require 'torch'
 
 local locatorconv = require '3-train-regression-bounding-box/locatorconv'
 
@@ -19,7 +21,32 @@ local inputsBatch = torch.Tensor(batchSize, 384, 11, 11):cuda()
 local outputsBatch = torch.Tensor(batchSize, 1):cuda()
 local tiefvision_commons = require '0-tiefvision-commons/tiefvision_commons'
 
-function train(trainIn, trainOut, model, criterion, index, optimState)
+local function saveModel(model, index)
+  local filename = tiefvision_commons.modelPath('locatorconv-' .. index .. '.model')
+  print('==> Saving Model: ' .. filename)
+  torch.save(filename, model)
+  print('==> Model Saved: ' .. filename)
+end
+
+local function trainBatch(model, criterion, inputsBatchesLocal, outputsBatchLocal, optimState)
+  local parameters, gradParameters = model:getParameters()
+  local feval = function(x)
+    if x ~= parameters then
+      parameters:copy(x)
+    end
+    gradParameters:zero()
+    local outputs = model:forward(inputsBatchesLocal)
+    local f = criterion:forward(outputs, outputsBatchLocal)
+    local df_do = criterion:backward(outputs, outputsBatchLocal)
+    model:backward(inputsBatchesLocal, df_do)
+    return f, gradParameters
+  end
+
+  local x, fx = optim.sgd(feval, parameters, optimState)
+  return fx[1]
+end
+
+local function train(trainIn, trainOut, model, criterion, index, optimState)
   local trainIndex = 1
   local trainingLoss = 0.0
   local trainBatches = math.floor(trainIn:size()[1] / batchSize)
@@ -38,7 +65,7 @@ function train(trainIn, trainOut, model, criterion, index, optimState)
   return trainingLoss
 end
 
-function loadDataFromFolder(dataFolder)
+local function loadDataFromFolder(dataFolder)
   local folder = tiefvision_commons.dataPath(dataFolder)
   local fileCount = 0
   for file in lfs.dir(folder) do
@@ -58,7 +85,7 @@ function loadDataFromFolder(dataFolder)
   return data
 end
 
-function getTestError(model, criterion, index)
+local function getTestError(model, criterion, index)
   local testIn = torch.load(tiefvision_commons.dataPath('bbox-test-in/1.data'))
   local testOut = torch.load(tiefvision_commons.dataPath('bbox-test-out/1.data'))
   local output = model:forward(testIn)
@@ -66,38 +93,13 @@ function getTestError(model, criterion, index)
   return err
 end
 
-function saveModel(model, index)
-  local filename = tiefvision_commons.modelPath('locatorconv-' .. index .. '.model')
-  print('==> Saving Model: ' .. filename)
-  torch.save(filename, model)
-  print('==> Model Saved: ' .. filename)
-end
-
-function trainBatch(model, criterion, inputsBatch, outputsBatch, optimState)
-  local parameters, gradParameters = model:getParameters()
-  local feval = function(x)
-    if x ~= parameters then
-      parameters:copy(x)
-    end
-    gradParameters:zero()
-    local outputs = model:forward(inputsBatch)
-    local f = criterion:forward(outputs, outputsBatch)
-    local df_do = criterion:backward(outputs, outputsBatch)
-    model:backward(inputsBatch, df_do)
-    return f, gradParameters
-  end
-
-  local x, fx = optim.sgd(feval, parameters, optimState)
-  return fx[1]
-end
-
-function loadCriterion()
+local function loadCriterion()
   local criterion = nn.MSECriterion()
   criterion.sizeAverage = false
   return criterion:cuda()
 end
 
-function loadSavedModel(index)
+local function loadSavedModel(index)
   local modelPath = tiefvision_commons.modelPath('locatorconv-' .. index .. '.model')
   if(tiefvision_commons.fileExists(modelPath)) then
     return torch.load(modelPath)
@@ -106,7 +108,7 @@ function loadSavedModel(index)
   end
 end
 
-function getOptions()
+local function getOptions()
   local cmd = torch.CmdLine()
   cmd:text()
   cmd:text('Bounding Box Regression Training')
@@ -123,7 +125,7 @@ function getOptions()
   return cmd:parse(arg)
 end
 
-function getModel(options)
+local function getModel(options)
   if (options.reset) then
     return locatorconv.loadModel()
   else
@@ -131,7 +133,7 @@ function getModel(options)
   end
 end
 
-function getIndexLabel(index)
+local function getIndexLabel(index)
   if (index == 1) then
     return "x-min"
   elseif (index == 2) then
@@ -143,7 +145,7 @@ function getIndexLabel(index)
   end
 end
 
-function trainIndex(index, model, optimState)
+local function trainIndex(index, model, optimState)
   local indexLabel = getIndexLabel(index)
   print("Training " .. indexLabel)
   local criterion = loadCriterion()
@@ -168,7 +170,7 @@ function trainIndex(index, model, optimState)
   end
 end
 
-function getOptimSatate(options)
+local function getOptimSatate(options)
   local optimState = {
     learningRate = options.learningRate,
     weightDecay = options.weightDecay,
@@ -182,4 +184,3 @@ local options = getOptions()
 local optimState = getOptimSatate(options)
 local model = getModel(options)
 trainIndex(options.index, model, optimState)
-
