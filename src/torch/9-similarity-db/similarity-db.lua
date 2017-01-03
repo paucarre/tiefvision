@@ -13,14 +13,13 @@ local torch = require 'torch'
 
 local tiefvision_commons = require '0-tiefvision-commons/tiefvision_commons'
 local similarity_lib = require '9-similarity-db/similarity_lib'
-local database = require('0-tiefvision-commons/tiefvision_config_loader').load().database
+local tiefvision_config_loader = require('0-tiefvision-commons/tiefvision_config_loader')
+local database = tiefvision_config_loader.load().database
 
-local function similarityDb()
+function similarityDb(imageFolder)
   local similaritiesDb = 'image-unsupervised-similarity-database'
 
-  local dataFolder = tiefvision_commons.dataPath('encoded-images')
-
-  local files = tiefvision_commons.getFiles(dataFolder)
+  local files = tiefvision_commons.getFiles(imageFolder)
   local filesAlreadyProcessed = database.keys(similaritiesDb)
   local filesRemaining = tiefvision_commons.tableSubtraction(files, filesAlreadyProcessed)
 
@@ -30,19 +29,13 @@ local function similarityDb()
 
     local similarities = {}
 
-    local referenceEncoding = torch.load(dataFolder .. '/' .. reference):double()
+    local referenceEncoding = torch.load(imageFolder .. '/' .. reference):double()
     for testIndex = 1, #files do
       local test = files[testIndex]
-      local imageEncoding = torch.load(dataFolder .. '/' .. test):double()
+      local imageEncoding = torch.load(imageFolder .. '/' .. test):double()
       local similarity = similarity_lib.similarity(referenceEncoding, imageEncoding)
       similarities[test] = similarity or -1
     end
-
-    -- compare itself with its mirror
-    local flipped = tiefvision_commons.dataPath('encoded-images-flipped', reference)
-    local flippedEncoding = torch.load(flipped):double()
-    local similarity = similarity_lib.similarity(referenceEncoding, flippedEncoding)
-    similarities[reference] = similarity or -1
 
     database.write(similaritiesDb, reference, similarities)
 
@@ -52,4 +45,16 @@ local function similarityDb()
   end
 end
 
-similarityDb()
+function getOptions()
+  local cmd = torch.CmdLine()
+  cmd:text('Compare images to one another to identify which are the most similar')
+  cmd:text('Options:')
+  cmd:option('-images', tiefvision_commons.dataPath('encoded-images'), 'Directory to load images')
+  cmd:text('')
+  cmd:option('-config', tiefvision_config_loader.default, 'Configuration file to use.')
+
+  return cmd:parse(arg)
+end
+
+local options = getOptions()
+similarityDb(options.images)

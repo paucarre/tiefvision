@@ -2,7 +2,8 @@
 -- You may use, distribute and modify this code under the
 -- terms of the Apache License v2.0 (http://www.apache.org/licenses/LICENSE-2.0.txt).
 
-local torchFolder = require('paths').thisfile('..')
+local paths = require('paths')
+local torchFolder = paths.thisfile('..')
 package.path = string.format("%s;%s/?.lua", os.getenv("LUA_PATH"), torchFolder)
 
 require 'inn'
@@ -41,11 +42,16 @@ for fileIndex = 1, #files do
       local xmax = bboxes[i][3]
       local ymax = bboxes[i][4]
       print(xmin, ymin, xmax, ymax)
+
       local inputCropped = image.crop(input, xmin, ymin, xmax, ymax)
+      paths.mkdir(bboxesFolder .. '/' .. i)
       image.save(bboxesFolder .. '/' .. i .. '/' .. files[fileIndex], inputCropped)
+
       -- generate flipped images
       local flippedInput = image.hflip(inputCropped)
+      paths.mkdir(flippedBboxesFolder .. '/' .. i)
       image.save(flippedBboxesFolder .. '/' .. i .. '/' .. files[fileIndex], flippedInput)
+
       collectgarbage()
     end
   end

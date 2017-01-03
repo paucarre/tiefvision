@@ -1,0 +1,49 @@
+#!/bin/bash
+
+trap 'exit 1' ERR
+
+ROOT=$(realpath $(dirname ${BASH_SOURCE[0]})/..)
+APP_FOLDER=$ROOT/src/torch
+
+if [ ! -z "$1" ]; then
+  if [ "$1" != "--config" ]; then
+    echo $"Usage: $0 [--config /path/to/config/file]" 1>&2
+    exit 1
+  elif [ ! -f "$2" ]; then
+    echo "missing config file: $2" 1>&2
+    exit 1
+  fi
+
+  CONFIG="-config $2"
+fi
+
+export TIEFVISION_HOME=$ROOT
+
+echo "Fetching models"
+download () {
+  url=https://s3.amazonaws.com/gilt-ml/$1
+  output=$ROOT/$2
+
+  mkdir -p $(dirname $output)
+
+  curl $url --output $output --silent
+}
+
+download caffe-zoo-mirror/ilsvrc_2012_mean.t7 src/torch/models/ilsvrc_2012_mean.t7
+download caffe-zoo-mirror/synset_words.txt src/torch/models/synset_words.txt
+download caffe-zoo-mirror/nin_imagenet.caffemodel src/torch/1-split-encoder-classifier/nin_imagenet.caffemodel
+download caffe-zoo-mirror/Goldfish3.jpg src/torch/1-split-encoder-classifier/Goldfish3.jpg
+
+echo "Generating encoder"
+luajit $APP_FOLDER/1-split-encoder-classifier/split-encoder-classifier.lua $CONFIG
+
+echo "Generating image encoding"
+luajit $APP_FOLDER/8-similarity-db-cnn/generate-similarity-db.lua \
+  -sources $ROOT/resources/dresses-db/master \
+  -destinations $ROOT/resources/dresses-db/encoded-images \
+  $CONFIG
+
+echo "Generating image similarities"
+luajit $APP_FOLDER/9-similarity-db/similarity-db.lua \
+  -images $ROOT/resources/dresses-db/encoded-images \
+  $CONFIG

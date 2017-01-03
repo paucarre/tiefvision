@@ -8,7 +8,8 @@
 -- to encode images.
 --
 
-local torchFolder = require('paths').thisfile('..')
+local paths = require('paths')
+local torchFolder = paths.thisfile('..')
 package.path = string.format("%s;%s/?.lua", os.getenv("LUA_PATH"), torchFolder)
 
 require 'image'
@@ -19,9 +20,9 @@ local torch = require 'torch'
 
 local tiefvision_commons = require '0-tiefvision-commons/tiefvision_commons'
 
-local proto_name = 'deploy.prototxt'
-local model_name = 'nin_imagenet.caffemodel'
-local image_name = 'Goldfish3.jpg'
+local proto_name = paths.thisfile('deploy.prototxt')
+local model_name = paths.thisfile('nin_imagenet.caffemodel')
+local image_name = paths.thisfile('Goldfish3.jpg');
 
 local net = loadcaffe.load(proto_name, model_name):cuda()
 net.modules[#net.modules] = nil -- remove the top softmax

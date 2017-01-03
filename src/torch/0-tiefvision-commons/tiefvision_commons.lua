@@ -47,7 +47,7 @@ end
 
 -- Loads the mapping from net outputs to human readable labels
 function tiefvision_commons.load_synset()
-  local file = io.open 'synset_words.txt'
+  local file = io.open(tiefvision_commons.modelPath('synset_words.txt'))
   local list = {}
   while true do
     local line = file:read()
