@@ -56,7 +56,7 @@ function tiefvision_redis_io.write(database, key, value)
   end
 
   file:close()
-  os.execute("cat " .. tmpFileName .. " | redis-cli --pipe -h " .. tiefvision_redis_io.host .. " -p " .. tiefvision_redis_io.port .. " 1>/dev/null &")
+  os.execute("cat " .. tmpFileName .. " | redis-cli --pipe -h " .. tiefvision_redis_io.host .. " -p " .. tiefvision_redis_io.port .. " -n " .. tiefvision_redis_io.database .. " 1>/dev/null &")
 end
 
 function tiefvision_redis_io.keys(database)
@@ -69,14 +69,17 @@ function tiefvision_redis_io.keys(database)
 end
 
 local factory = {}
-setmetatable(factory, { __call = function(_, host, port)
+setmetatable(factory, { __call = function(_, host, port, database)
   tiefvision_redis_io.host = host
   tiefvision_redis_io.port = port or 6379
+  tiefvision_redis_io.database = database or 0
 
   tiefvision_redis_io.redisClient = redis.connect(
     tiefvision_redis_io.host,
     tiefvision_redis_io.port
   )
+
+  tiefvision_redis_io.redisClient:select(tiefvision_redis_io.database)
 
   return tiefvision_redis_io
 end })
