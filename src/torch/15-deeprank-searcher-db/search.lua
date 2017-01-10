@@ -13,11 +13,10 @@ local torch = require 'torch'
 
 local tiefvision_config_loader = require '0-tiefvision-commons/tiefvision_config_loader'
 local search_commons = require '10-similarity-searcher-cnn-db/search_commons'
-local database = tiefvision_config_loader.load().database
+local database = tiefvision_config_loader.load().database.supervised_similarity
 
 local function getTestError(reference)
-  local similarityDb = 'image-supervised-similarity-database'
-  local similarities = database.read(similarityDb, reference)
+  local similarities = database.read(reference)
 
   local comparisonTable = {}
   for file, sim in pairs(similarities) do

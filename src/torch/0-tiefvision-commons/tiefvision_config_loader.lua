@@ -30,7 +30,9 @@ local configLoader = {}
 
 configLoader.argument = argument(arg)
 configLoader.environment = os.getenv('CONFIG')
-configLoader.default = tiefvision_commons.path('src/torch/config.lua')
+configLoader.default = tiefvision_commons.path(
+  tiefvision_commons.rootPath(),
+  'src/torch/config.lua')
 
 configLoader.file = configLoader.argument or
   configLoader.environment or

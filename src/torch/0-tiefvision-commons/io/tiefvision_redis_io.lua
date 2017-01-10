@@ -12,13 +12,6 @@ package.path = string.format("%s;%s/?.lua", os.getenv("LUA_PATH"), torchFolder)
 
 local redis = require 'redis'
 
-local function removeDatabaseFromKey(key, database)
-  -- redis key format is "database:filename"
-  -- to remove database, sub requires database length + 1
-  -- to remove the column, sub requires + 1
-  return string.sub(key, #database + 2)
-end
-
 local function toRedisProtocol(...)
   local args = {...}
   local argsLength = #args
@@ -35,37 +28,26 @@ local function toRedisProtocol(...)
 end
 
 local tiefvision_redis_io = {}
-function tiefvision_redis_io.read(database, key)
-  local response = tiefvision_redis_io.redisClient:hgetall(database .. ':' .. key)
-  local responseWithNewKeys = {}
-  for k, v in pairs(response) do
-    local newKey = removeDatabaseFromKey(k, database)
-    responseWithNewKeys[newKey] = v
-  end
 
-  return responseWithNewKeys
+function tiefvision_redis_io.read(key)
+  return tiefvision_redis_io.redisClient:hgetall(key)
 end
 
-function tiefvision_redis_io.write(database, key, value)
+function tiefvision_redis_io.write(key, value)
   local tmpFileName = paths.tmpname()
   local file = io.open(tmpFileName, "w")
 
-  file:write(toRedisProtocol("DEL", database .. ':' .. key))
+  file:write(toRedisProtocol("DEL", key))
   for k, v in pairs(value) do
-    file:write(toRedisProtocol("HSET", database .. ':' .. key, k, v))
+    file:write(toRedisProtocol("HSET", key, k, v))
   end
 
   file:close()
   os.execute("cat " .. tmpFileName .. " | redis-cli --pipe -h " .. tiefvision_redis_io.host .. " -p " .. tiefvision_redis_io.port .. " -n " .. tiefvision_redis_io.database .. " 1>/dev/null &")
 end
 
-function tiefvision_redis_io.keys(database)
-  local keys = tiefvision_redis_io.redisClient:keys(database .. ":*")
-  for i = 1, #keys do
-    keys[i] = removeDatabaseFromKey(keys[i], database)
-  end
-
-  return keys
+function tiefvision_redis_io.keys()
+  return tiefvision_redis_io.redisClient:keys("*")
 end
 
 local factory = {}

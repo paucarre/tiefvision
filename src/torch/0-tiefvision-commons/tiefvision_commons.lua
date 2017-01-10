@@ -103,28 +103,39 @@ function tiefvision_commons.tableSubtraction(t1, t2)
 end
 
 function tiefvision_commons.path(...)
+  local file_path, _ = table.concat({...}, '/'):gsub('/+', '/')
+  return file_path
+end
+
+function tiefvision_commons.rootPath()
   local environmentVariableName = 'TIEFVISION_HOME'
   local root = os.getenv(environmentVariableName)
   if not root then
     error(string.format("missing environment variable: %s", environmentVariableName))
   end
 
-  local file_path_table = {...}
-  table.insert(file_path_table, 1, root)
-  local file_path, _ = table.concat(file_path_table, '/'):gsub('/+', '/')
-  return file_path
+  return root
 end
 
 function tiefvision_commons.dataPath(...)
-  return tiefvision_commons.path('src/torch/data', unpack({...}))
+  return tiefvision_commons.path(
+    tiefvision_commons.rootPath(),
+    'src/torch/data',
+    unpack({...}))
 end
 
 function tiefvision_commons.modelPath(...)
-  return tiefvision_commons.path('src/torch/models', unpack({...}))
+  return tiefvision_commons.path(
+    tiefvision_commons.rootPath(),
+    'src/torch/models',
+    unpack({...}))
 end
 
 function tiefvision_commons.resourcePath(...)
-  return tiefvision_commons.path('resources', unpack({...}))
+  return tiefvision_commons.path(
+    tiefvision_commons.rootPath(),
+    'resources',
+    unpack({...}))
 end
 
 return tiefvision_commons

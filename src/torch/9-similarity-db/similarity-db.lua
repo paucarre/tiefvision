@@ -14,13 +14,11 @@ local torch = require 'torch'
 local tiefvision_commons = require '0-tiefvision-commons/tiefvision_commons'
 local similarity_lib = require '9-similarity-db/similarity_lib'
 local tiefvision_config_loader = require('0-tiefvision-commons/tiefvision_config_loader')
-local database = tiefvision_config_loader.load().database
+local database = tiefvision_config_loader.load().database.unsupervised_similarity
 
 function similarityDb(imageFolder)
-  local similaritiesDb = 'image-unsupervised-similarity-database'
-
   local files = tiefvision_commons.getFiles(imageFolder)
-  local filesAlreadyProcessed = database.keys(similaritiesDb)
+  local filesAlreadyProcessed = database.keys()
   local filesRemaining = tiefvision_commons.tableSubtraction(files, filesAlreadyProcessed)
 
   for referenceIndex = 1, #filesRemaining do
@@ -37,7 +35,7 @@ function similarityDb(imageFolder)
       similarities[test] = similarity or -1
     end
 
-    database.write(similaritiesDb, reference, similarities)
+    database.write(reference, similarities)
 
     if referenceIndex % 5 == 0 then
       collectgarbage()
