@@ -16,13 +16,18 @@ local similarity_lib = require '9-similarity-db/similarity_lib'
 local tiefvision_config_loader = require('0-tiefvision-commons/tiefvision_config_loader')
 local database = tiefvision_config_loader.load().database.unsupervised_similarity
 
-function similarityDb(imageFolder)
+function similarityDb(imageFolder, reprocess)
   local files = tiefvision_commons.getFiles(imageFolder)
-  local filesAlreadyProcessed = database.keys()
-  local filesRemaining = tiefvision_commons.tableSubtraction(files, filesAlreadyProcessed)
+  files = tiefvision_commons.tableShuffle(files)
 
-  for referenceIndex = 1, #filesRemaining do
-    local reference = filesRemaining[referenceIndex]
+  local filesToProcess = files
+  if not reprocess then
+    local filesAlreadyProcessed = database.keys()
+    filesToProcess = tiefvision_commons.tableSubtraction(files, filesAlreadyProcessed)
+  end
+
+  for referenceIndex = 1, #filesToProcess do
+    local reference = filesToProcess[referenceIndex]
     print(reference)
 
     local similarities = {}
@@ -48,6 +53,7 @@ function getOptions()
   cmd:text('Compare images to one another to identify which are the most similar')
   cmd:text('Options:')
   cmd:option('-images', tiefvision_commons.dataPath('encoded-images'), 'Directory to load images')
+  cmd:option('-reprocess', false, 'Reprocess images that were already processed')
   cmd:text('')
   cmd:option('-config', tiefvision_config_loader.default, 'Configuration file to use.')
 
@@ -55,4 +61,4 @@ function getOptions()
 end
 
 local options = getOptions()
-similarityDb(options.images)
+similarityDb(options.images, options.reprocess)

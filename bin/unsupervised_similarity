@@ -65,4 +65,5 @@ luajit $APP_FOLDER/8-similarity-db-cnn/generate-similarity-db.lua \
 echo "Generating image similarities"
 luajit $APP_FOLDER/9-similarity-db/similarity-db.lua \
   -images $ENCODED_IMAGES \
+  -reprocess \
   -config $CONFIG

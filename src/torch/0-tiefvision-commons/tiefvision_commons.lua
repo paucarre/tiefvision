@@ -102,6 +102,17 @@ function tiefvision_commons.tableSubtraction(t1, t2)
   return t1
 end
 
+function tiefvision_commons.tableShuffle(t)
+  local n = #t -- gets the length of the table
+  while n > 1 do -- only run if the table has more than 1 element
+    local k = math.random(n) -- get a random number
+    t[n], t[k] = t[k], t[n]
+    n = n - 1
+ end
+
+ return t
+end
+
 function tiefvision_commons.path(...)
   local file_path, _ = table.concat({...}, '/'):gsub('/+', '/')
   return file_path
