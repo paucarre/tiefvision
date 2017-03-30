@@ -12,11 +12,12 @@ require 'lfs'
 local torch = require 'torch'
 
 local tiefvision_commons = require '0-tiefvision-commons/tiefvision_commons'
+local tiefvision_reduction = require '0-tiefvision-commons/tiefvision_reduction'
 local similarity_lib = require '9-similarity-db/similarity_lib'
 local tiefvision_config_loader = require('0-tiefvision-commons/tiefvision_config_loader')
 local database = tiefvision_config_loader.load().database.unsupervised_similarity
 
-function similarityDb(imageFolder, reprocess)
+function similarityDb(imageFolder, reprocess, kNearestNeighbors)
   local files = tiefvision_commons.getFiles(imageFolder)
   files = tiefvision_commons.tableShuffle(files)
 
@@ -40,6 +41,10 @@ function similarityDb(imageFolder, reprocess)
       similarities[test] = similarity or -1
     end
 
+    if kNearestNeighbors > 0 then
+      similarities = tiefvision_reduction.getNearestNeighbors(similarities, kNearestNeighbors)
+    end
+
     database.write(reference, similarities)
 
     if referenceIndex % 5 == 0 then
@@ -54,6 +59,7 @@ function getOptions()
   cmd:text('Options:')
   cmd:option('-images', tiefvision_commons.dataPath('encoded-images'), 'Directory to load images')
   cmd:option('-reprocess', false, 'Reprocess images that were already processed')
+  cmd:option('-kNearestNeighbors', -1, 'Amount of nearest neighbors to save')
   cmd:text('')
   cmd:option('-config', tiefvision_config_loader.default, 'Configuration file to use.')
 
@@ -61,4 +67,4 @@ function getOptions()
 end
 
 local options = getOptions()
-similarityDb(options.images, options.reprocess)
+similarityDb(options.images, options.reprocess, options.kNearestNeighbors)
